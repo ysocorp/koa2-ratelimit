@@ -1,0 +1,67 @@
+{
+  "name": "koa2-ratelimit",
+  "author": "YSO CORP",
+  "version": "0.1.0",
+  "description": "IP rate-limiting middleware for Koajs 2. Use to limit repeated requests to APIs and/or endpoints such as password reset.",
+  "main": "src/index.js",
+  "engines": {
+    "node": "7.10.1",
+    "npm": "4.1.2"
+  },
+  "people": {
+    "name": "YSO CORP",
+    "email": "contact@ysocorp.com",
+    "url": "http://ysocorp.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ysocorp/koa2-ratelimit"
+  },
+  "dependencies": {
+    "moment": "^2.19.4",
+    "sequelize": "^4.28.1"
+  },
+  "devDependencies": {
+    "koa": "^2.4.1",
+    "koa-bodyparser": "^4.2.0",
+    "koa-router": "^7.3.0",
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.13.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.5.1",
+    "expect": "^21.2.1",
+    "mocha": "^4.0.1"
+  },
+  "scripts": {
+    "lint": "eslint src test",
+    "test": "mocha --opts mocha.opts"
+  },
+  "keywords": [
+    "koa2-ratelimit",
+    "koa2-rate-limit",
+    "koa-rate-limit",
+    "koa2-ratelimit",
+    "koa-ratelimit",
+    "koa2-brute-force",
+    "koa-brute-force",
+    "koa2-bruteforce",
+    "koa-bruteforce",
+    "koa2",
+    "rate",
+    "limit",
+    "ratelimit",
+    "rate-limit",
+    "middleware",
+    "ip",
+    "auth",
+    "authorization",
+    "security",
+    "brute",
+    "force",
+    "bruteforce",
+    "brute-force",
+    "attack"
+  ]
+}
