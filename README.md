@@ -2,7 +2,7 @@
 
 Rate-limiting middleware for Koa2 with `async` `await`. Use to limit repeated requests to APIs and/or endpoints such as password reset.
 
-Note: This module is base on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 with `async` `await` function.
+Note: This module is base on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 ES6 with `async` `await` function.
 
 
 ## Install
@@ -18,10 +18,10 @@ For an API-only server where the rate-limiter should be applied to all requests:
 ```js
 const RateLimit = require('koa2-ratelimit').RateLimit;
 
-const limiter = new RateLimit({
+const limiter = RateLimit.middleware({
   windowMs: 15*60*1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-}).middleware;
+});
 
 //  apply to all requests
 app.use(limiter);
@@ -34,24 +34,24 @@ const RateLimit = require('koa2-ratelimit').RateLimit;
 const KoaRouter = require('koa-router');
 const router = new KoaRouter();
 
-const getUserLimiter = new RateLimit({
+const getUserLimiter = RateLimit.middleware({
   windowMs: 15*60*1000, // 15 minutes
   max: 100,
   prefixKey: 'get/user/:id' // to allow the bdd to Differentiate the endpoint 
-}).middleware;
+});
 // add route with getUserLimiter middleware
 router.get('/user/:id', getUserLimiter, (ctx) => {
   // Do your job
 });
 
-const createAccountLimiter = new RateLimit({
+const createAccountLimiter = RateLimit.middleware({
   windowMs: 60*60*1000, // 1 hour window
   delayAfter: 1, // begin slowing down responses after the first request
   delayMs: 3*1000, // slow down subsequent responses by 3 seconds per request
   max: 5, // start blocking after 5 requests
   prefixKey: 'post/user', // to allow the bdd to Differentiate the endpoint 
   message: "Too many accounts created from this IP, please try again after an hour"
-}).middleware;
+});
 // add route  with createAccountLimiter middleware
 router.post('/user', createAccountLimiter, (ctx) => {
   // Do your job
@@ -60,6 +60,27 @@ router.post('/user', createAccountLimiter, (ctx) => {
 // mount routes
 app.use(this.koaRouter.middleware())
 
+```
+
+Set default options to all your middleware:
+
+```js
+const RateLimit = require('koa2-ratelimit').RateLimit;
+
+RateLimit.defaultOptions({
+    message: 'Go out.',
+    // ...
+});
+
+const getUserLimiter = RateLimit.middleware({
+  max: 100,
+  // message: 'Go out.', will be add
+});
+
+const createAccountLimiter = RateLimit.middleware({
+  max: 5, // start blocking after 5 requests
+  // message: 'Go out.', will be add
+});
 ```
 
 Use with SequelizeStore 
@@ -71,19 +92,22 @@ const SequelizeStore = require('koa2-ratelimit').SequelizeStore;
 
 const sequelize = new Sequelize(/*your config to connected to bdd*/);
 
-const getUserLimiter = new RateLimit({
-    prefixKey: 'get/user/:id',
+RateLimit.defaultOptions({
+    message: 'Go out.',
     store: new SequelizeStore(sequelize, {
         tableName: 'ratelimits', // table to manage the middleware
         tableAbuseName: 'ratelimitsabuses', // table to have an history of abuses
-    }) // this store will automaticaly create tables if not exist
-}).middleware;
+    })
+});
+
+const getUserLimiter = RateLimit.middleware({
+    prefixKey: 'get/user/:id',
+});
 router.get('/user/:id', getUserLimiter, (ctx) => {});
 
-const createAccountLimiter = new RateLimit({
+const createAccountLimiter = RateLimit.middleware.middleware({
     prefixKey: 'post/user',
-    store: new SequelizeStore(sequelize)
-}).middleware;
+});
 router.post('/user', createAccountLimiter, (ctx) => {});
 
 // mount routes

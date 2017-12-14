@@ -134,7 +134,8 @@ class SequelizeStore extends Store {
         });
     }
 
-    async incr(key) {
+    async incr(key, options) {
+        console.log('***************SequelizeStore::key', key);
         const table = await this._getTable();
         await this._removeAll(table);
         const now = new Date();
@@ -143,37 +144,37 @@ class SequelizeStore extends Store {
             where: { key },
             defaults: {
                 key,
-                date_end: now.getTime() + this.options.windowMs,
+                date_end: now.getTime() + options.windowMs,
             },
         });
         await this._increment(table, { key }, 1, 'counter');
         return data[0].counter + 1;
     }
 
-    async decrement(key) {
+    async decrement(key/*, options*/) {
         const table = await this._getTable();
         await this._increment(table, { key }, -1, 'counter');
     }
 
-    async saveAbuse({ key, ip, user_id }) {
+    async saveAbuse(options) {
         const table = await this._getTable();
-        const ratelimit = await table.findOne({ where: { key } });
+        const ratelimit = await table.findOne({ where: { key: options.key } });
 
         if (ratelimit) {
             const tableAbuse = await this._getTableAbuse();
             const date_end = ratelimit.date_end;
             // create if not exist
             await tableAbuse.create({
-                key,
-                prefix: this.options.prefixKey,
-                interval: this.options.windowMs,
-                nb_max: this.options.max,
-                nb_hit: this.options.max,
-                user_id,
-                ip,
+                key: options.key,
+                prefix: options.prefixKey,
+                interval: options.windowMs,
+                nb_max: options.max,
+                nb_hit: options.max,
+                user_id: options.user_id,
+                ip: options.ip,
                 date_end,
             }).catch(() => { });
-            await this._increment(tableAbuse, { key, date_end }, 1, 'nb_hit');
+            await this._increment(tableAbuse, { key: options.key, date_end }, 1, 'nb_hit');
         }
     }
 }

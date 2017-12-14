@@ -1,24 +1,18 @@
 const Store = require('./Store.js');
 
-const Hits = {};
+var Hits = {};
 
 class MemoryStore extends Store {
-
-    initOptions(options) {
-        super.initOptions(options);
-
-        const interval = setInterval(() => this._resetAll(), this.options.windowMs);
-        if (interval.unref) {
-            interval.unref();
-        }
+    static cleanAll() {
+        Hits = {};
     }
 
-    _getHit(key) {
+    _getHit(key, options) {
         if (!Hits[key]) {
             const now = new Date();
             Hits[key] = {
                 counter: 0,
-                date_end: now.getTime() + this.options.windowMs,
+                date_end: now.getTime() + options.windowMs,
             };
         }
         return Hits[key];
@@ -26,7 +20,7 @@ class MemoryStore extends Store {
 
     _resetAll() {
         const now = (new Date()).getTime();
-        for (const key in Hits) {
+        for (const key in Hits) { // eslint-disable-line
             this._resetKey(key, now);
         }
     }
@@ -39,9 +33,9 @@ class MemoryStore extends Store {
         }
     }
 
-    async incr(key) {
-        this._resetKey(key);
-        const hits = this._getHit(key);
+    async incr(key, options) {
+        this._resetAll();
+        const hits = this._getHit(key, options);
         hits.counter += 1;
 
         return hits.counter;

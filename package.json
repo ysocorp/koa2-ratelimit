@@ -22,9 +22,6 @@
     "sequelize": "^4.28.1"
   },
   "devDependencies": {
-    "koa": "^2.4.1",
-    "koa-bodyparser": "^4.2.0",
-    "koa-router": "^7.3.0",
     "babel-eslint": "^8.0.3",
     "eslint": "^4.13.1",
     "eslint-config-airbnb": "^16.1.0",
