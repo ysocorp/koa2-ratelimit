@@ -19,8 +19,8 @@ For an API-only server where the rate-limiter should be applied to all requests:
 const RateLimit = require('koa2-ratelimit').RateLimit;
 
 const limiter = RateLimit.middleware({
-  windowMs: 15*60*1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  interval: 15*60*1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per interval
 });
 
 //  apply to all requests
@@ -35,7 +35,7 @@ const KoaRouter = require('koa-router');
 const router = new KoaRouter();
 
 const getUserLimiter = RateLimit.middleware({
-  windowMs: 15*60*1000, // 15 minutes
+  interval: 15*60*1000, // 15 minutes
   max: 100,
   prefixKey: 'get/user/:id' // to allow the bdd to Differentiate the endpoint 
 });
@@ -45,9 +45,9 @@ router.get('/user/:id', getUserLimiter, (ctx) => {
 });
 
 const createAccountLimiter = RateLimit.middleware({
-  windowMs: 60*60*1000, // 1 hour window
+  interval: 60*60*1000, // 1 hour window
   delayAfter: 1, // begin slowing down responses after the first request
-  delayMs: 3*1000, // slow down subsequent responses by 3 seconds per request
+  timeWait: 3*1000, // slow down subsequent responses by 3 seconds per request
   max: 5, // start blocking after 5 requests
   prefixKey: 'post/user', // to allow the bdd to Differentiate the endpoint 
   message: "Too many accounts created from this IP, please try again after an hour"
@@ -119,10 +119,10 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 
 ## Configuration
 
-* **windowMs**: milliseconds - how long to keep records of requests in memory. Defaults to `60000` (1 minute).
-* **delayAfter**: max number of connections during `windowMs` before starting to delay responses. Defaults to `1`. Set to `0` to disable delaying.  
-* **delayMs**: milliseconds - how long to delay the response, multiplied by (number of recent hits - `delayAfter`).  Defaults to `1000` (1 second). Set to `0` to disable delaying.
-* **max**: max number of connections during `windowMs` milliseconds before sending a 429 response. Defaults to `5`. Set to `0` to disable.
+* **interval**: milliseconds - how long to keep records of requests in memory. Defaults to `60000` (1 minute).
+* **delayAfter**: max number of connections during `interval` before starting to delay responses. Defaults to `1`. Set to `0` to disable delaying.  
+* **timeWait**: milliseconds - how long to delay the response, multiplied by (number of recent hits - `delayAfter`).  Defaults to `1000` (1 second). Set to `0` to disable delaying.
+* **max**: max number of connections during `interval` milliseconds before sending a 429 response. Defaults to `5`. Set to `0` to disable.
 * **message**: Error message returned when `max` is exceeded. Defaults to `'Too many requests, please try again later.'`
 * **statusCode**: HTTP status code returned when `max` is exceeded. Defaults to `429`.
 * **headers**: Enable headers for request limit (`X-RateLimit-Limit`) and current usage (`X-RateLimit-Remaining`) on all responses and time to wait before retrying (`Retry-After`) when `max` is exceeded.
@@ -174,7 +174,7 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
         ctx.status = this.options.statusCode;
         ctx.body = { message: this.options.message };
         if (this.options.headers) {
-            ctx.set('Retry-After', Math.ceil(this.options.windowMs / 1000));
+            ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
         }
     }
     ```
@@ -197,8 +197,8 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
    * [MemoryStore](src/MemoryStore.js): (default)Simple in-memory option. Does not share state when app has multiple processes or servers.
    * [SequelizeStore](src/SequelizeStore.js): more suitable for large or demanding deployments.
 
-The `delayAfter` and `delayMs` options were written for human-facing pages such as login and password reset forms.
-For public APIs, setting these to `0` (disabled) and relying on only `windowMs` and `max` for rate-limiting usually makes the most sense.
+The `delayAfter` and `timeWait` options were written for human-facing pages such as login and password reset forms.
+For public APIs, setting these to `0` (disabled) and relying on only `interval` and `max` for rate-limiting usually makes the most sense.
 
 
 ## License

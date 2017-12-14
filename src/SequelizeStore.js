@@ -144,7 +144,7 @@ class SequelizeStore extends Store {
             where: { key },
             defaults: {
                 key,
-                date_end: now.getTime() + options.windowMs,
+                date_end: now.getTime() + options.interval,
             },
         });
         await this._increment(table, { key }, 1, 'counter');
@@ -167,7 +167,7 @@ class SequelizeStore extends Store {
             await tableAbuse.create({
                 key: options.key,
                 prefix: options.prefixKey,
-                interval: options.windowMs,
+                interval: options.interval,
                 nb_max: options.max,
                 nb_hit: options.max,
                 user_id: options.user_id,

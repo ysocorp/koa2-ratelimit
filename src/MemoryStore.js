@@ -12,7 +12,7 @@ class MemoryStore extends Store {
             const now = new Date();
             Hits[key] = {
                 counter: 0,
-                date_end: now.getTime() + options.windowMs,
+                date_end: now.getTime() + options.interval,
             };
         }
         return Hits[key];

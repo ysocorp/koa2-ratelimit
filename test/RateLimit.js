@@ -59,8 +59,8 @@ describe('RateLimit node module', () => {
 
     async function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    };
-    function nextNb() { nbCall += 1; };
+    }
+    function nextNb() { nbCall += 1; }
     function getCtx() {
         return {
             request: {
@@ -75,44 +75,57 @@ describe('RateLimit node module', () => {
                 }
             },
             set: () => { },
-        }
-    };
+        };
+    }
 
-    it("should not allow to use of a store that is not valid", (done) => {
+    it('Times should return the correct time in ms', () => {
+        expect(RateLimit.RateLimit.timeToMs(123)).toBe(123);
+        expect(RateLimit.RateLimit.timeToMs({ hour: 2 })).toBe(2 * 3600000);
+        expect(RateLimit.RateLimit.timeToMs({ hour: 2, min: 3 })).toBe((2 * 3600000) + (3 * 60000));
+    });
+
+    it('Times should throw error if key does not exist', (done) => {
+        try {
+            RateLimit.RateLimit.timeToMs({ hours: 3 });
+        } catch (e) { return done(); }
+        return done(new Error('Times should throw error if key does not exist'));
+    });
+
+    it('should not allow to use of a store that is not valid', (done) => {
         try {
             RateLimit.middleware({ store: new InvalidStore() });
         } catch (e) {
             return done();
         }
 
-        done(new Error("It allowed an invalid store"));
+        return done(new Error('It allowed an invalid store'));
     });
 
-    it("should call incr on the store", async () => {
+    it('should call incr on the store', async () => {
         const middleware = RateLimit.middleware({ store });
 
         await middleware(getCtx(), nextNb);
         expect(store.incr_was_called).toBe(true);
     });
 
-    it("should apply a small delay to the second request", async () => {
-        const middleware = RateLimit.middleware({ delayAfter: 1, delayMs: 500, store });
+    it('should apply a small delay to the second request', async () => {
+        const middleware = RateLimit.middleware({ delayAfter: 1, timeWait: 500, store });
         await middleware(getCtx(), nextNb);
 
         start = Date.now();
         await middleware(getCtx(), nextNb);
         expect(Date.now() - start).toBeGreaterThan(500);
     });
-    it("should apply a larger delay to the subsequent request", async () => {
-        const middleware = RateLimit.middleware({ delayAfter: 1, delayMs: 100, store });
+    it('should apply a larger delay to the subsequent request', async () => {
+        const middleware = RateLimit.middleware({ delayAfter: 1, timeWait: 100, store });
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
         expect(Date.now() - start).toBeGreaterThan(400);
     });
-    it("should allow delayAfter requests before delaying responses", async () => {
-        const middleware = RateLimit.middleware({ delayAfter: 2, delayMs: 100, store });
+    it('should allow delayAfter requests before delaying responses', async () => {
+        const middleware = RateLimit.middleware({ delayAfter: 2, timeWait: 100, store });
 
         await middleware(getCtx(), nextNb);
         expect(Date.now() - start).toBeLessThan(50);
@@ -125,8 +138,8 @@ describe('RateLimit node module', () => {
         expect(Date.now() - start).toBeLessThan(150);
     });
 
-    it("should allow delayAfter to be disabled entirely", async () => {
-        const middleware = RateLimit.middleware({ delayAfter: 0, delayMs: 1000, store });
+    it('should allow delayAfter to be disabled entirely', async () => {
+        const middleware = RateLimit.middleware({ delayAfter: 0, timeWait: 1000, store });
 
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
@@ -135,21 +148,17 @@ describe('RateLimit node module', () => {
         expect(Date.now() - start).toBeLessThan(100);
     });
 
-    it("should refuse additional connections once IP has reached the max", async () => {
+    it('should refuse additional connections once IP has reached the max', async () => {
         const middleware = RateLimit.middleware({ max: 1, store });
 
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
+        await middleware(getCtx(), nextNb);
 
-        const isCall = false;
-        const myNext = () => { isCall: true };
-
-        await middleware(getCtx(), myNext);
-
-        expect(isCall).toBe(false);
+        expect(nbCall).toBe(1);
     });
 
-    it("should allow max to be disabled entirely", async () => {
+    it('should allow max to be disabled entirely', async () => {
         const middleware = RateLimit.middleware({ max: 0, store });
 
         await middleware(getCtx(), nextNb);
@@ -159,7 +168,7 @@ describe('RateLimit node module', () => {
         expect(nbCall).toBe(3);
     });
 
-    it("should show the provided message instead of the default message when max connections are reached", async () => {
+    it('should show the provided message instead of the default message when max connections are reached', async () => {
         const message = 'my msg';
         const middleware = RateLimit.middleware({ max: 2, message, store });
         await middleware(getCtx(), nextNb);
@@ -171,8 +180,8 @@ describe('RateLimit node module', () => {
         expect(ctx.body.message).toBe(message);
     });
 
-    it("should (eventually) accept new connections from a blocked IP", async () => {
-        const middleware = RateLimit.middleware({ max: 10, windowMs: 50, prefixKey: start, store: memoryStore });
+    it('should (eventually) accept new connections from a blocked IP', async () => {
+        const middleware = RateLimit.middleware({ max: 10, interval: 50, prefixKey: start, store: memoryStore });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         await sleep(60);
@@ -180,8 +189,8 @@ describe('RateLimit node module', () => {
         expect(nbCall).toBe(3);
     });
 
-    it("should work repeatedly (issues #2 & #3)", async () => {
-        const middleware = RateLimit.middleware({ max: 2, windowMs: 50, prefixKey: start, store: memoryStore });
+    it('should work repeatedly (issues #2 & #3)', async () => {
+        const middleware = RateLimit.middleware({ max: 2, interval: 50, prefixKey: start, store: memoryStore });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         await sleep(60);
@@ -189,31 +198,29 @@ describe('RateLimit node module', () => {
         expect(nbCall).toBe(3);
     });
 
-    it("should allow the error statusCode to be customized", async () => {
+    it('should allow the error statusCode to be customized', async () => {
         const middleware = RateLimit.middleware({ max: 1, statusCode: 123, store });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         expect(ctx.status).toBe(123);
     });
 
-    it("should use the custom handler when specified", async () => {
+    it('should use the custom handler when specified', async () => {
         const middleware = RateLimit.middleware({
             max: 1,
-            handler: function (ctx) {
-                ctx.status = 231;
-            },
-            store
+            handler: (c) => { c.status = 231; },
+            store,
         });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         expect(ctx.status).toBe(231);
     });
 
-    it("should allow custom skip function", async () => {
+    it('should allow custom skip function', async () => {
         const middleware = RateLimit.middleware({
             max: 1,
-            skip: (ctx) => {
-                assert.ok(ctx);
+            skip: (c) => {
+                assert.ok(c);
                 return true;
             },
             store,
@@ -224,11 +231,11 @@ describe('RateLimit node module', () => {
         expect(nbCall).toBe(3);
     });
 
-    it("should allow custom key generators", async () => {
+    it('should allow custom key generators', async () => {
         let key = null;
         const middleware = RateLimit.middleware({
-            keyGenerator: (ctx) => {
-                assert.ok(ctx);
+            keyGenerator: (c) => {
+                assert.ok(c);
                 key = 'TITI';
                 return key;
             },
