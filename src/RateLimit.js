@@ -4,9 +4,9 @@ const MemoryStore = require('./MemoryStore.js');
 /* eslint-disable no-var */
 var defaultOptions = {
     // window, delay, and max apply per-key unless global is set to true
-    interval: 60 * 1000, // milliseconds - how long to keep records of requests in memory
+    interval: { min: 1 }, // milliseconds - how long to keep records of requests in memory
     delayAfter: 0, // how many requests to allow through before starting to delay responses
-    timeWait: 1000, // milliseconds - base delay applied to the response - multiplied by number of recent hits for the same key.
+    timeWait: { sec: 1 }, // milliseconds - base delay applied to the response - multiplied by number of recent hits for the same key.
     max: 5, // max number of recent connections during `window` milliseconds before sending a 429 response
 
     message: 'Too many requests, please try again later.',

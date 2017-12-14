@@ -19,7 +19,7 @@ For an API-only server where the rate-limiter should be applied to all requests:
 const RateLimit = require('koa2-ratelimit').RateLimit;
 
 const limiter = RateLimit.middleware({
-  interval: 15*60*1000, // 15 minutes
+  interval: { min: 15 }, // 15 minutes = 15*60*1000
   max: 100, // limit each IP to 100 requests per interval
 });
 
@@ -45,7 +45,7 @@ router.get('/user/:id', getUserLimiter, (ctx) => {
 });
 
 const createAccountLimiter = RateLimit.middleware({
-  interval: 60*60*1000, // 1 hour window
+  interval: { hour: 1, min: 30 }, // 1h30 window
   delayAfter: 1, // begin slowing down responses after the first request
   timeWait: 3*1000, // slow down subsequent responses by 3 seconds per request
   max: 5, // start blocking after 5 requests
@@ -119,9 +119,9 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 
 ## Configuration
 
-* **interval**: milliseconds - how long to keep records of requests in memory. Defaults to `60000` (1 minute).
+* **interval**: [Time Type](#time-type) - how long to keep records of requests in memory. Defaults to `60000` (1 minute).
 * **delayAfter**: max number of connections during `interval` before starting to delay responses. Defaults to `1`. Set to `0` to disable delaying.  
-* **timeWait**: milliseconds - how long to delay the response, multiplied by (number of recent hits - `delayAfter`).  Defaults to `1000` (1 second). Set to `0` to disable delaying.
+* **timeWait**: [Time Type](#time-type) - how long to delay the response, multiplied by (number of recent hits - `delayAfter`).  Defaults to `1000` (1 second). Set to `0` to disable delaying.
 * **max**: max number of connections during `interval` milliseconds before sending a 429 response. Defaults to `5`. Set to `0` to disable.
 * **message**: Error message returned when `max` is exceeded. Defaults to `'Too many requests, please try again later.'`
 * **statusCode**: HTTP status code returned when `max` is exceeded. Defaults to `429`.
@@ -170,7 +170,7 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 * **handler**: The function to execute once the max limit is exceeded. It receives the request and the response objects. The "next" param is available if you need to pass to the next middleware. Defaults:
 
     ```js
-    async function (ctx, /*next*/) {
+    async function (ctx/*, next*/) {
         ctx.status = this.options.statusCode;
         ctx.body = { message: this.options.message };
         if (this.options.headers) {
@@ -200,6 +200,34 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 The `delayAfter` and `timeWait` options were written for human-facing pages such as login and password reset forms.
 For public APIs, setting these to `0` (disabled) and relying on only `interval` and `max` for rate-limiting usually makes the most sense.
 
+
+## Time Type
+Time type can be milliseconds or an object
+```js
+    Times = {
+        ms ?: number,
+        sec ?: number,
+        min ?: number,
+        hour ?: number,
+        day ?: number,
+        week ?: number,
+        month ?: number,
+        year ?: number,
+    };
+```
+
+Examples
+```js
+    RateLimit.middleware({
+        interval: { hour: 1, min: 30 }, // 1h30 window
+        timeWait: { week: 2 }, // 2 week window
+    });
+    RateLimit.middleware({
+        interval: { ms: 2000 }, // 2000 ms = 2 sec
+        timeWait: 2000, // 2000 ms = 2 sec
+    });
+```
+    
 
 ## License
 
