@@ -6,7 +6,9 @@ var Store = require('./Store.js');
 
 module.exports = {
   RateLimit,
-  MemoryStore,
-  SequelizeStore,
-  Store,
+  Stores: {
+    Memory: MemoryStore,
+    Sequelize: SequelizeStore,
+    Store,
+  },
 };

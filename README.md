@@ -88,13 +88,13 @@ Use with SequelizeStore
 ```js
 const Sequelize = require('sequelize');
 const RateLimit = require('koa2-ratelimit').RateLimit;
-const SequelizeStore = require('koa2-ratelimit').SequelizeStore;
+const Stores = require('koa2-ratelimit').Stores;
 
 const sequelize = new Sequelize(/*your config to connected to bdd*/);
 
 RateLimit.defaultOptions({
     message: 'Go out.',
-    store: new SequelizeStore(sequelize, {
+    store: new Stores.Sequelize(sequelize, {
         tableName: 'ratelimits', // table to manage the middleware
         tableAbuseName: 'ratelimitsabuses', // table to have an history of abuses
     })
