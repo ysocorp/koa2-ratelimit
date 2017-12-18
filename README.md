@@ -167,7 +167,7 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
     }
     ```
 
-* **handler**: The function to execute once the max limit is exceeded. It receives the request and the response objects. The "next" param is available if you need to pass to the next middleware. Defaults:
+* **handler**: The function to execute once the max limit has been exceeded. It receives the request and the response objects. The "next" param is available if you need to pass to the next middleware. Defaults:
 
     ```js
     async function (ctx/*, next*/) {
