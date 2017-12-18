@@ -2,7 +2,7 @@
 
 Rate-limiting middleware for Koa2 with `async` `await`. Use to limit repeated requests to APIs and/or endpoints such as password reset.
 
-Note: This module is base on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 ES6 with `async` `await` function.
+Note: This module is based on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 ES6 with the `async` `await` capabilities.
 
 
 ## Install
@@ -68,18 +68,18 @@ Set default options to all your middleware:
 const RateLimit = require('koa2-ratelimit').RateLimit;
 
 RateLimit.defaultOptions({
-    message: 'Go out.',
+    message: 'Get out.',
     // ...
 });
 
 const getUserLimiter = RateLimit.middleware({
   max: 100,
-  // message: 'Go out.', will be add
+  // message: 'Get out.', will be added
 });
 
 const createAccountLimiter = RateLimit.middleware({
   max: 5, // start blocking after 5 requests
-  // message: 'Go out.', will be add
+  // message: 'Get out.', will be added
 });
 ```
 
@@ -93,10 +93,10 @@ const Stores = require('koa2-ratelimit').Stores;
 const sequelize = new Sequelize(/*your config to connected to bdd*/);
 
 RateLimit.defaultOptions({
-    message: 'Go out.',
+    message: 'Get out.',
     store: new Stores.Sequelize(sequelize, {
         tableName: 'ratelimits', // table to manage the middleware
-        tableAbuseName: 'ratelimitsabuses', // table to have an history of abuses
+        tableAbuseName: 'ratelimitsabuses', // table to store the history of abuses in.
     })
 });
 
@@ -119,15 +119,15 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 
 ## Configuration
 
-* **interval**: [Time Type](#time-type) - how long to keep records of requests in memory. Defaults to `60000` (1 minute).
+* **interval**: [Time Type](#time-type) - how long should records of requests be kept in memory. Defaults to `60000` (1 minute).
 * **delayAfter**: max number of connections during `interval` before starting to delay responses. Defaults to `1`. Set to `0` to disable delaying.  
 * **timeWait**: [Time Type](#time-type) - how long to delay the response, multiplied by (number of recent hits - `delayAfter`).  Defaults to `1000` (1 second). Set to `0` to disable delaying.
-* **max**: max number of connections during `interval` milliseconds before sending a 429 response. Defaults to `5`. Set to `0` to disable.
+* **max**: max number of connections during `interval` milliseconds before sending a `429` response code. Defaults to `5`. Set to `0` to disable.
 * **message**: Error message returned when `max` is exceeded. Defaults to `'Too many requests, please try again later.'`
 * **statusCode**: HTTP status code returned when `max` is exceeded. Defaults to `429`.
 * **headers**: Enable headers for request limit (`X-RateLimit-Limit`) and current usage (`X-RateLimit-Remaining`) on all responses and time to wait before retrying (`Retry-After`) when `max` is exceeded.
-* **skipFailedRequests**: when `true` failed requests (response status >= 400) won't be counted. Defaults to `false`.
-* **getUserId**: Function used to get userId (if connected) to be add has key and save in bdd if abuse. Defaults:
+* **skipFailedRequests**: when `true`, failed requests (response status >= 400) won't be counted. Defaults to `false`.
+* **getUserId**: Function used to get userId (if connected) to be added as key and saved in bdd, should an abuse case surface. Defaults:
 
     ```js
     async function (ctx) {
@@ -147,7 +147,7 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
     },
     ```
     
-* **keyGenerator**: Function used to generate keys. By default userID if conected or user IP address. Defaults:
+* **keyGenerator**: Function used to generate keys. By default userID (if connected) or the user's IP address. Defaults:
 
     ```js
     async function (ctx) {
