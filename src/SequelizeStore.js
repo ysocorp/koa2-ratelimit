@@ -135,7 +135,6 @@ class SequelizeStore extends Store {
     }
 
     async incr(key, options) {
-        console.log('***************SequelizeStore::key', key);
         const table = await this._getTable();
         await this._removeAll(table);
         const now = new Date();
