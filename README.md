@@ -58,7 +58,7 @@ router.post('/user', createAccountLimiter, (ctx) => {
 });
 
 // mount routes
-app.use(this.koaRouter.middleware())
+app.use(router.middleware())
 
 ```
 
@@ -111,7 +111,7 @@ const createAccountLimiter = RateLimit.middleware.middleware({
 router.post('/user', createAccountLimiter, (ctx) => {});
 
 // mount routes
-app.use(this.koaRouter.middleware())
+app.use(router.middleware())
 
 ```
 
@@ -220,7 +220,7 @@ Examples
 ```js
     RateLimit.middleware({
         interval: { hour: 1, min: 30 }, // 1h30 window
-        timeWait: { week: 2 }, // 2 week window
+        timeWait: { week: 2 }, // 2 weeks window
     });
     RateLimit.middleware({
         interval: { ms: 2000 }, // 2000 ms = 2 sec
