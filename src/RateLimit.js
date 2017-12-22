@@ -119,7 +119,7 @@ class RateLimit {
         if (this.options.onLimitReached) {
             return this.options.onLimitReached(ctx);
         }
-        this.store.saveAbuse(Object.assign(this.options, {
+        this.store.saveAbuse(Object.assign({}, this.options, {
             key: await this.keyGenerator(ctx),
             ip: ctx.request.ip,
             user_id: await this.getUserId(ctx),

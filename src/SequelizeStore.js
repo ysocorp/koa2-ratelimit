@@ -163,15 +163,18 @@ class SequelizeStore extends Store {
             const tableAbuse = await this._getTableAbuse();
             const date_end = ratelimit.date_end;
             // create if not exist
-            await tableAbuse.create({
-                key: options.key,
-                prefix: options.prefixKey,
-                interval: options.interval,
-                nb_max: options.max,
-                nb_hit: options.max,
-                user_id: options.user_id,
-                ip: options.ip,
-                date_end,
+            await tableAbuse.findOrCreate({
+                where: { key: options.key, date_end },
+                defaults: {
+                    key: options.key,
+                    prefix: options.prefixKey,
+                    interval: options.interval,
+                    nb_max: options.max,
+                    nb_hit: options.max,
+                    user_id: options.user_id,
+                    ip: options.ip,
+                    date_end,
+                },
             }).catch(() => { });
             await this._increment(tableAbuse, { key: options.key, date_end }, 1, 'nb_hit');
         }
