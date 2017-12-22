@@ -1,5 +1,8 @@
 #  Koajs 2 Rate Limit (Bruteforce)
 
+[![Build Status](https://secure.travis-ci.org/ysocorp/koa2-ratelimit.png?branch=master "Test")](http://travis-ci.org/ysocorp/koa2-ratelimit)
+[![NPM version](http://badge.fury.io/js/koa2-ratelimit.png)](https://npmjs.org/package/koa2-ratelimit "View this project on NPM")
+
 Rate-limiting middleware for Koa2 with `async` `await`. Use to limit repeated requests to APIs and/or endpoints such as password reset.
 
 Note: This module is based on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 ES6 with the `async` `await` capabilities.
