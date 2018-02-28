@@ -49,10 +49,13 @@
     "rate",
     "limit",
     "sequelize",
+    "mongodb",
     "ratelimit",
     "ratelimit-sequelize",
+    "ratelimit-mongodb",
     "rate-limit",
     "rate-limit-sequelize",
+    "rate-limit-mongodb",
     "middleware",
     "ip",
     "auth",
@@ -62,8 +65,10 @@
     "force",
     "bruteforce",
     "bruteforce-sequelize",
+    "bruteforce-mongodb",
     "brute-force",
     "brute-force-sequelize",
+    "brute-force-mongodb",
     "attack"
   ]
 }

@@ -115,6 +115,24 @@ router.post('/user', createAccountLimiter, (ctx) => {});
 
 // mount routes
 app.use(router.middleware())
+```
+
+Use with MongodbStore
+
+```js
+const mongoose = require('mongoose');
+const RateLimit = require('koa2-ratelimit').RateLimit;
+const Stores = require('koa2-ratelimit').Stores;
+
+await mongoose.connect(/*your config to connected to bdd*/);
+
+RateLimit.defaultOptions({
+    message: 'Get out.',
+    store: new Stores.MongodbStore(mongoose.connection, {
+        collectionName: 'ratelimits', // table to manage the middleware
+        collectionAbuseName: 'ratelimitsabuses', // table to store the history of abuses in.
+    }),
+});
 
 ```
 
