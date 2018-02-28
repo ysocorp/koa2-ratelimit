@@ -21,10 +21,7 @@ const tableOption = [
         },
     },
     {
-        indexes: [
-            { unique: true, fields: ['key'] },
-            { unique: false, fields: ['date_end'] },
-        ],
+        indexes: [{ unique: true, fields: ['key'] }, { unique: false, fields: ['date_end'] }],
         underscored: true,
         createdAt: false,
         updatedAt: false,
@@ -84,13 +81,10 @@ const tableAbuseOption = [
         },
     },
     {
-        indexes: [
-            { unique: true, fields: ['key', 'date_end'] },
-        ],
+        indexes: [{ unique: true, fields: ['key', 'date_end'] }],
         underscored: true,
     },
 ];
-
 
 class SequelizeStore extends Store {
     constructor(sequelize, options = {}) {
@@ -111,17 +105,18 @@ class SequelizeStore extends Store {
     }
     async _getTableAbuse() {
         if (!this.tableAbuses) {
-            this.tableAbuses = this.sequelize.define(this.tableAbuseName, tableAbuseOption[0], tableAbuseOption[1]);
+            this.tableAbuses = this.sequelize.define(
+                this.tableAbuseName,
+                tableAbuseOption[0],
+                tableAbuseOption[1],
+            );
             await this.tableAbuses.sync();
         }
         return this.tableAbuses;
     }
 
     async _increment(table, where, nb = 1, field) {
-        return table.update(
-            { [field]: global.sequelize.literal(`${field} + ${nb}`) },
-            { where }
-        );
+        return table.update({ [field]: global.sequelize.literal(`${field} + ${nb}`) }, { where });
     }
 
     // remove all if time is passed
@@ -150,7 +145,7 @@ class SequelizeStore extends Store {
         return data[0].counter + 1;
     }
 
-    async decrement(key/*, options*/) {
+    async decrement(key /* , options */) {
         const table = await this._getTable();
         await this._increment(table, { key }, -1, 'counter');
     }
@@ -161,21 +156,24 @@ class SequelizeStore extends Store {
 
         if (ratelimit) {
             const tableAbuse = await this._getTableAbuse();
+            // eslint-disable-next-line
             const date_end = ratelimit.date_end;
             // create if not exist
-            await tableAbuse.findOrCreate({
-                where: { key: options.key, date_end },
-                defaults: {
-                    key: options.key,
-                    prefix: options.prefixKey,
-                    interval: options.interval,
-                    nb_max: options.max,
-                    nb_hit: options.max,
-                    user_id: options.user_id,
-                    ip: options.ip,
-                    date_end,
-                },
-            }).catch(() => { });
+            await tableAbuse
+                .findOrCreate({
+                    where: { key: options.key, date_end },
+                    defaults: {
+                        key: options.key,
+                        prefix: options.prefixKey,
+                        interval: options.interval,
+                        nb_max: options.max,
+                        nb_hit: options.max,
+                        user_id: options.user_id,
+                        ip: options.ip,
+                        date_end,
+                    },
+                })
+                .catch(() => {});
             await this._increment(tableAbuse, { key: options.key, date_end }, 1, 'nb_hit');
         }
     }
