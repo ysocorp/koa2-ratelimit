@@ -1,7 +1,7 @@
 {
   "name": "koa2-ratelimit",
   "author": "YSO CORP",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "IP rate-limiting middleware for Koajs 2. Use to limit repeated requests to APIs and/or endpoints such as password reset.",
   "main": "src/index.js",
   "engines": {
