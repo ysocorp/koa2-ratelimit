@@ -1,6 +1,6 @@
 const Store = require('./Store.js');
 
-var Hits = {};
+let Hits = {};
 
 class MemoryStore extends Store {
     static cleanAll() {
@@ -20,7 +20,7 @@ class MemoryStore extends Store {
 
     _resetAll() {
         const now = (new Date()).getTime();
-        for (const key in Hits) { // eslint-disable-line
+    for (const key in Hits) { // eslint-disable-line
             this._resetKey(key, now);
         }
     }
@@ -38,7 +38,7 @@ class MemoryStore extends Store {
         const hits = this._getHit(key, options);
         hits.counter += 1;
 
-        return hits.counter;
+        return hits;
     }
 
     decrement(key) {
@@ -46,7 +46,7 @@ class MemoryStore extends Store {
         hits.counter -= 1;
     }
 
-    saveAbuse() {}
+    saveAbuse() { }
 }
 
 module.exports = MemoryStore;

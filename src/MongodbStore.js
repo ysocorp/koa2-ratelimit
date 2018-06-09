@@ -113,7 +113,13 @@ class SequelizeStore extends Store {
             },
         });
         await this._increment(this.Ratelimits, { key }, 1, 'counter');
-        return data.counter + 1;
+        data.counter += 1;
+        // Remap the date field name to be consistent with the rest
+        // whilst remaining backwards compatible
+        return {
+            counter: data.counter,
+            date_end: data.dateEnd,
+        };
     }
 
     async decrement(key /* , options */) {
@@ -127,7 +133,7 @@ class SequelizeStore extends Store {
 
         if (ratelimit) {
             // eslint-disable-next-line
-            const dateEnd = ratelimit.dateEnd;
+      const dateEnd = ratelimit.dateEnd;
             // create if not exist
             await this.Abuse.findOrCreate({
                 where: { key: options.key, dateEnd },
@@ -141,7 +147,7 @@ class SequelizeStore extends Store {
                     ip: options.ip,
                     dateEnd,
                 },
-            }).catch(() => {});
+            }).catch(() => { });
 
             await this._increment(this.Abuse, { key: options.key, dateEnd }, 1, 'nbHit');
         }

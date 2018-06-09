@@ -57,7 +57,7 @@ class RateLimit {
             let timeMs = 0;
             for (const key in time) {
                 if (!TimeKeys.includes(key)) {
-                    throw new Error(`Invalide key ${key}, allow keys: ${TimeKeys.toString()}`)
+                    throw new Error(`Invalide key ${key}, allow keys: ${TimeKeys.toString()}`);
                 }
                 if (time[key] > 0) {
                     timeMs += time[key] * Times[key];
@@ -79,7 +79,7 @@ class RateLimit {
         return `${this.options.prefixKey}|${ctx.request.ip}`;
     }
 
-    async skip(ctx) { // eslint-disable-line
+  async skip(ctx) { // eslint-disable-line
         if (this.options.skip) {
             return this.options.skip(ctx);
         }
@@ -104,12 +104,13 @@ class RateLimit {
         return null;
     }
 
-    async handler(ctx/*, next*/) {
+    async handler(ctx/* , next */) {
         if (this.options.handler) {
             return this.options.handler(ctx);
         }
         ctx.status = this.options.statusCode;
         ctx.body = { message: this.options.message };
+        // Kept this for backward compatability
         if (this.options.headers) {
             ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
         }
@@ -141,13 +142,16 @@ class RateLimit {
         const current = await this.store.incr(key, this.options);
         ctx.state.rateLimit = {
             limit: this.options.max,
-            current,
+            current: current.counter,
             remaining: Math.max(this.options.max - current, 0),
+            // eslint-disable-next-line
+            reset: (current.reset / 1000 | 0),
         };
 
         if (this.options.headers) {
             ctx.set('X-RateLimit-Limit', this.options.max);
             ctx.set('X-RateLimit-Remaining', ctx.state.rateLimit.remaining);
+            ctx.set('X-RateLimit-Reset', ctx.state.rateLimit.reset);
         }
 
         if (this.options.max && current > this.options.max) {
