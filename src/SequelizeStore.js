@@ -142,7 +142,8 @@ class SequelizeStore extends Store {
             },
         });
         await this._increment(table, { key }, 1, 'counter');
-        return data[0].counter + 1;
+        data[0].counter += 1;
+        return data[0];
     }
 
     async decrement(key /* , options */) {
@@ -157,7 +158,7 @@ class SequelizeStore extends Store {
         if (ratelimit) {
             const tableAbuse = await this._getTableAbuse();
             // eslint-disable-next-line
-            const date_end = ratelimit.date_end;
+      const date_end = ratelimit.date_end;
             // create if not exist
             await tableAbuse
                 .findOrCreate({
@@ -173,7 +174,7 @@ class SequelizeStore extends Store {
                         date_end,
                     },
                 })
-                .catch(() => {});
+                .catch(() => { });
             await this._increment(tableAbuse, { key: options.key, date_end }, 1, 'nb_hit');
         }
     }
