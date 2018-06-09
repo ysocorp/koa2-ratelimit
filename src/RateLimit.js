@@ -56,11 +56,13 @@ class RateLimit {
         if (typeof time === 'object') {
             let timeMs = 0;
             for (const key in time) {
-                if (!TimeKeys.includes(key)) {
-                    throw new Error(`Invalide key ${key}, allow keys: ${TimeKeys.toString()}`)
-                }
-                if (time[key] > 0) {
-                    timeMs += time[key] * Times[key];
+                if (key) {
+                    if (!TimeKeys.includes(key)) {
+                        throw new Error(`Invalide key ${key}, allow keys: ${TimeKeys.toString()}`);
+                    }
+                    if (time[key] > 0) {
+                        timeMs += time[key] * Times[key];
+                    }
                 }
             }
             return timeMs;
@@ -104,26 +106,28 @@ class RateLimit {
         return null;
     }
 
-    async handler(ctx/*, next*/) {
+    async handler(ctx/* , next */) {
         if (this.options.handler) {
-            return this.options.handler(ctx);
-        }
-        ctx.status = this.options.statusCode;
-        ctx.body = { message: this.options.message };
-        if (this.options.headers) {
-            ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
+            this.options.handler(ctx);
+        } else {
+            ctx.status = this.options.statusCode;
+            ctx.body = { message: this.options.message };
+            if (this.options.headers) {
+                ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
+            }
         }
     }
 
     async onLimitReached(ctx) {
         if (this.options.onLimitReached) {
-            return this.options.onLimitReached(ctx);
+            this.options.onLimitReached(ctx);
+        } else {
+            this.store.saveAbuse(Object.assign({}, this.options, {
+                key: await this.keyGenerator(ctx),
+                ip: ctx.request.ip,
+                user_id: await this.getUserId(ctx),
+            }));
         }
-        this.store.saveAbuse(Object.assign({}, this.options, {
-            key: await this.keyGenerator(ctx),
-            ip: ctx.request.ip,
-            user_id: await this.getUserId(ctx),
-        }));
     }
 
     get middleware() {

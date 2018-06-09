@@ -37,46 +37,40 @@ class MockStore extends Store {
     }
 }
 
+function getCtx() {
+    return {
+        request: { ip: '192.168.1.0' },
+        res: { on: () => { } },
+        state: { user: { id: 1 } },
+        set: () => { },
+    };
+}
+
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 describe('RateLimit node module', () => {
-
-    let start, nbCall, delay, message, app, ctx, store, memoryStore;
+    let start;
+    let nbCall;
+    let ctx;
+    let store;
+    let memoryStore;
 
     beforeEach(() => {
         start = Date.now();
         store = new MockStore();
         MemoryStore.cleanAll();
         memoryStore = new MemoryStore();
-        message = 'You have been very naughty.. No API response for you!!';
         nbCall = 0;
         ctx = getCtx();
     });
 
     afterEach(() => {
-        delay = null;
         nbCall = 0;
     });
 
-    async function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
     function nextNb() { nbCall += 1; }
-    function getCtx() {
-        return {
-            request: {
-                ip: '192.168.1.0',
-            },
-            res: {
-                on: () => { },
-            },
-            state: {
-                user: {
-                    id: 1,
-                }
-            },
-            set: () => { },
-        };
-    }
 
     it('Times should return the correct time in ms', () => {
         expect(RateLimit.RateLimit.timeToMs(123)).toBe(123);
@@ -174,14 +168,16 @@ describe('RateLimit node module', () => {
         await middleware(getCtx(), nextNb);
         await middleware(getCtx(), nextNb);
 
-        const ctx = getCtx();
-        await middleware(ctx, nextNb);
+        const ctxDefault = getCtx();
+        await middleware(ctxDefault, nextNb);
 
-        expect(ctx.body.message).toBe(message);
+        expect(ctxDefault.body.message).toBe(message);
     });
 
     it('should (eventually) accept new connections from a blocked IP', async () => {
-        const middleware = RateLimit.middleware({ max: 10, interval: 50, prefixKey: start, store: memoryStore });
+        const middleware = RateLimit.middleware({
+            max: 10, interval: 50, prefixKey: start, store: memoryStore,
+        });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         await sleep(60);
@@ -190,7 +186,9 @@ describe('RateLimit node module', () => {
     });
 
     it('should work repeatedly (issues #2 & #3)', async () => {
-        const middleware = RateLimit.middleware({ max: 2, interval: 50, prefixKey: start, store: memoryStore });
+        const middleware = RateLimit.middleware({
+            max: 2, interval: 50, prefixKey: start, store: memoryStore,
+        });
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         await sleep(60);

@@ -1,6 +1,6 @@
 const Store = require('./Store.js');
 
-var Hits = {};
+let Hits = {};
 
 class MemoryStore extends Store {
     static cleanAll() {
