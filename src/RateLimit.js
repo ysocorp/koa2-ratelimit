@@ -142,19 +142,22 @@ class RateLimit {
 
         const key = await this.keyGenerator(ctx);
 
-        const current = await this.store.incr(key, this.options);
+        const { counter, dateEnd } = await this.store.incr(key, this.options);
+        const reset = new Date(dateEnd).getTime();
         ctx.state.rateLimit = {
             limit: this.options.max,
-            current,
-            remaining: Math.max(this.options.max - current, 0),
+            current: counter,
+            remaining: Math.max(this.options.max - counter, 0),
+            reset: Math.ceil(reset / 1000),
         };
 
         if (this.options.headers) {
             ctx.set('X-RateLimit-Limit', this.options.max);
             ctx.set('X-RateLimit-Remaining', ctx.state.rateLimit.remaining);
+            ctx.set('X-RateLimit-Reset', ctx.state.rateLimit.reset);
         }
 
-        if (this.options.max && current > this.options.max) {
+        if (this.options.max && counter > this.options.max) {
             await this.onLimitReached(ctx);
             return this.handler(ctx, next);
         }
@@ -167,8 +170,8 @@ class RateLimit {
             });
         }
 
-        if (this.options.delayAfter && this.options.timeWait && current > this.options.delayAfter) {
-            const delay = (current - this.options.delayAfter) * this.options.timeWait;
+        if (this.options.delayAfter && this.options.timeWait && counter > this.options.delayAfter) {
+            const delay = (counter - this.options.delayAfter) * this.options.timeWait;
             await this.wait(delay);
             return next();
         }

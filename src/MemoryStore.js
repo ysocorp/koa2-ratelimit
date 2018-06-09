@@ -38,7 +38,10 @@ class MemoryStore extends Store {
         const hits = this._getHit(key, options);
         hits.counter += 1;
 
-        return hits.counter;
+        return {
+            counter: hits.counter,
+            dateEnd: hits.date_end,
+        };
     }
 
     decrement(key) {

@@ -142,7 +142,10 @@ class SequelizeStore extends Store {
             },
         });
         await this._increment(table, { key }, 1, 'counter');
-        return data[0].counter + 1;
+        return {
+            counter: data[0].counter + 1,
+            dateEnd: data[0].date_end,
+        };
     }
 
     async decrement(key /* , options */) {

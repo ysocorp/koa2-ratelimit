@@ -113,7 +113,10 @@ class SequelizeStore extends Store {
             },
         });
         await this._increment(this.Ratelimits, { key }, 1, 'counter');
-        return data.counter + 1;
+        return {
+            counter: data.counter + 1,
+            dateEnd: data.dateEnd,
+        };
     }
 
     async decrement(key /* , options */) {

@@ -24,7 +24,10 @@ class MockStore extends Store {
     async incr() {
         this.nb += 1;
         this.incr_was_called = true;
-        return this.nb;
+        return {
+            counter: this.nb,
+            dateEnd: new Date().setHours(new Date().getHours() + 1),
+        };
     }
 
     async decrement() {
@@ -241,5 +244,25 @@ describe('RateLimit node module', () => {
         });
         await middleware(ctx, nextNb);
         expect(key).toBe('TITI');
+    });
+
+    it('should set X-RateLimit-Reset with the correct value', async () => {
+        const middleware = RateLimit.middleware({ store });
+        const dateEnd = new Date(1528824545000);
+        const dateEndSec = dateEnd / 1000;
+        let dateEndReset = null;
+
+        store.incr = async () => {
+            return { counter: 10, dateEnd };
+        };
+        ctx.set = (key, value) => {
+            if (key === 'X-RateLimit-Reset') {
+                dateEndReset = value;
+            }
+        };
+        await middleware(ctx, nextNb);
+
+        expect(dateEndReset).toBe(dateEndSec);
+        expect(ctx.state.rateLimit.reset).toBe(dateEndSec);
     });
 });
