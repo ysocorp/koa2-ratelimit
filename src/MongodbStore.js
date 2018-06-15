@@ -3,11 +3,12 @@ const mongoose = require('mongoose');
 const Store = require('./Store.js');
 
 async function findOrCreate({ where, defaults }) {
-    const elem = await this.findOne(where);
-    if (elem) {
-        return elem;
-    }
-    return new this(defaults).save();
+    return this.collection.findAndModify(
+        where,
+        [],
+        { $setOnInsert: defaults },
+        { upsert: true, new: true }, // return new doc if one is upserted
+    );
 }
 
 const abuseSchema = new mongoose.Schema({
@@ -84,7 +85,7 @@ abuseHistorySchema.pre('update', beforSave);
 abuseHistorySchema.pre('findOneAndUpdate', beforSave);
 abuseHistorySchema.statics.findOrCreate = findOrCreate;
 
-class SequelizeStore extends Store {
+class MongodbStore extends Store {
     constructor(mongodb, options = {}) {
         super();
         this.collectionName = options.collectionName || 'Ratelimits';
@@ -151,4 +152,4 @@ class SequelizeStore extends Store {
     }
 }
 
-module.exports = SequelizeStore;
+module.exports = MongodbStore;
