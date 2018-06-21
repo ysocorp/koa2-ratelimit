@@ -9,26 +9,24 @@ class MemoryStore extends Store {
 
     _getHit(key, options) {
         if (!Hits[key]) {
-            const now = new Date();
             Hits[key] = {
                 counter: 0,
-                date_end: now.getTime() + options.interval,
+                date_end: Date.now() + options.interval,
             };
         }
         return Hits[key];
     }
 
     _resetAll() {
-        const now = (new Date()).getTime();
+        const now = Date.now();
         for (const key in Hits) { // eslint-disable-line
             this._resetKey(key, now);
         }
     }
 
     _resetKey(key, now) {
-        now = now || (new Date()).getTime();
-        const elem = Hits[key];
-        if (elem && elem.date_end <= now) {
+        now = now || Date.now();
+        if (Hits[key] && Hits[key].date_end <= now) {
             delete Hits[key];
         }
     }
