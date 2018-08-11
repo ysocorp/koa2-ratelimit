@@ -128,7 +128,7 @@ await mongoose.connect(/*your config to connected to bdd*/);
 
 RateLimit.defaultOptions({
     message: 'Get out.',
-    store: new Stores.MongodbStore(mongoose.connection, {
+    store: new Stores.Mongodb(mongoose.connection, {
         collectionName: 'ratelimits', // table to manage the middleware
         collectionAbuseName: 'ratelimitsabuses', // table to store the history of abuses in.
     }),
