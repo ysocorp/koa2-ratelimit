@@ -23,6 +23,7 @@ var defaultOptions = {
     getUserId: undefined,
     handler: undefined,
     onLimitReached: undefined,
+    weight: undefined,
 };
 
 const TimeKeys = ['ms', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
@@ -79,6 +80,13 @@ class RateLimit {
             return `${this.options.prefixKey}|${userId}`;
         }
         return `${this.options.prefixKey}|${ctx.request.ip}`;
+    }
+
+    async weight(ctx) {
+        if (this.options.weight) {
+            return this.options.weight(ctx);
+        }
+        return 1;
     }
 
     async skip(ctx) { // eslint-disable-line
@@ -141,8 +149,9 @@ class RateLimit {
         }
 
         const key = await this.keyGenerator(ctx);
+        const weight = await this.weight(ctx);
 
-        const { counter, dateEnd } = await this.store.incr(key, this.options);
+        const { counter, dateEnd } = await this.store.incr(key, this.options, weight);
         const reset = new Date(dateEnd).getTime();
         ctx.state.rateLimit = {
             limit: this.options.max,
@@ -165,7 +174,7 @@ class RateLimit {
         if (this.options.skipFailedRequests) {
             ctx.res.on('finish', () => {
                 if (ctx.status >= 400) {
-                    this.store.decrement(key, this.options);
+                    this.store.decrement(key, this.options, weight);
                 }
             });
         }

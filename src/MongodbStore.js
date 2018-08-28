@@ -103,7 +103,7 @@ class MongodbStore extends Store {
         await this.Ratelimits.remove({ dateEnd: { $lte: Date.now() } });
     }
 
-    async incr(key, options) {
+    async incr(key, options, weight) {
         await this._removeAll();
 
         const data = await this.Ratelimits.findOrCreate({
@@ -113,15 +113,15 @@ class MongodbStore extends Store {
                 dateEnd: Date.now() + options.interval,
             },
         });
-        await this._increment(this.Ratelimits, { key }, 1, 'counter');
+        await this._increment(this.Ratelimits, { key }, weight, 'counter');
         return {
-            counter: data.counter + 1,
+            counter: data.counter + weight,
             dateEnd: data.dateEnd,
         };
     }
 
-    async decrement(key /* , options */) {
-        await this._increment(this.Ratelimits, { key }, -1, 'counter');
+    async decrement(key, options, weight) {
+        await this._increment(this.Ratelimits, { key }, -weight, 'counter');
     }
 
     async saveAbuse(options) {
