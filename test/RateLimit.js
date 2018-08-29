@@ -235,9 +235,7 @@ describe('RateLimit node module', () => {
     it('should allow custom weight function', async () => {
         const middleware = RateLimit.middleware({
             max: 3,
-            weight: (c) => {
-                return 2;
-            },
+            weight: () => 2,
             store,
         });
         await middleware(ctx, nextNb);
