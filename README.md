@@ -212,6 +212,14 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
     }
     ```
 
+* **weight**: Function to set the incrementation of the counter depending on the request. Defaults:
+
+    ```js
+    async function (/*ctx*/) {
+        return 1;
+    }
+    ```
+
 * **store**: The storage to use when persisting rate limit attempts. By default, the [MemoryStore](src/MemoryStore.js) is used.
 
   Avaliable data stores are:

@@ -129,7 +129,7 @@ class SequelizeStore extends Store {
         });
     }
 
-    async incr(key, options) {
+    async incr(key, options, weight) {
         const table = await this._getTable();
         await this._removeAll(table);
         const now = new Date();
@@ -141,16 +141,16 @@ class SequelizeStore extends Store {
                 date_end: now.getTime() + options.interval,
             },
         });
-        await this._increment(table, { key }, 1, 'counter');
+        await this._increment(table, { key }, weight, 'counter');
         return {
-            counter: data[0].counter + 1,
+            counter: data[0].counter + weight,
             dateEnd: data[0].date_end,
         };
     }
 
-    async decrement(key /* , options */) {
+    async decrement(key, options, weight) {
         const table = await this._getTable();
-        await this._increment(table, { key }, -1, 'counter');
+        await this._increment(table, { key }, -weight, 'counter');
     }
 
     async saveAbuse(options) {

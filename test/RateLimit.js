@@ -21,8 +21,8 @@ class MockStore extends Store {
         this.saveAbuse_was_called = false;
     }
 
-    async incr() {
-        this.nb += 1;
+    async incr(key, options, weight) {
+        this.nb += weight;
         this.incr_was_called = true;
         return {
             counter: this.nb,
@@ -30,9 +30,9 @@ class MockStore extends Store {
         };
     }
 
-    async decrement() {
+    async decrement(key, options, weight) {
         this.decrement_was_called = true;
-        this.nb -= 1;
+        this.nb -= weight;
     }
 
     async saveAbuse() {
@@ -230,6 +230,19 @@ describe('RateLimit node module', () => {
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         expect(nbCall).toBe(3);
+    });
+
+    it('should allow custom weight function', async () => {
+        const middleware = RateLimit.middleware({
+            max: 3,
+            weight: (c) => {
+                return 2;
+            },
+            store,
+        });
+        await middleware(ctx, nextNb);
+        await middleware(ctx, nextNb);
+        expect(nbCall).toBe(1);
     });
 
     it('should allow custom key generators', async () => {

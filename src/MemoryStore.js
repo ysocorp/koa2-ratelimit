@@ -33,10 +33,10 @@ class MemoryStore extends Store {
         }
     }
 
-    async incr(key, options) {
+    async incr(key, options, weight) {
         this._resetAll();
         const hits = this._getHit(key, options);
-        hits.counter += 1;
+        hits.counter += weight;
 
         return {
             counter: hits.counter,
@@ -44,9 +44,9 @@ class MemoryStore extends Store {
         };
     }
 
-    decrement(key) {
+    decrement(key, options, weight) {
         const hits = this._getHit(key);
-        hits.counter -= 1;
+        hits.counter -= weight;
     }
 
     saveAbuse() {}
