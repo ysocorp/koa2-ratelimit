@@ -37,6 +37,7 @@ const Times = {
     month: 2628000000,
     year: 12 * 2628000000,
 };
+const toFinds = ['id', 'userId', 'user_id', 'idUser', 'id_user'];
 
 class RateLimit {
     constructor(options) {
@@ -101,7 +102,6 @@ class RateLimit {
             return this.options.getUserId(ctx);
         }
         const whereFinds = [ctx.state.user, ctx.user, ctx.state.User, ctx.User, ctx.state, ctx];
-        const toFinds = ['id', 'userId', 'user_id', 'idUser', 'id_user'];
         for (const whereFind of whereFinds) {
             if (whereFind) {
                 for (const toFind of toFinds) {
