@@ -15,8 +15,6 @@ var defaultOptions = {
     skipFailedRequests: false, // Do not count failed requests (status >= 400)
     prefixKey: 'global', // the prefixKey to get to remove all key
 
-    store: new MemoryStore(),
-
     // redefin fonction
     keyGenerator: undefined,
     skip: undefined,
@@ -46,7 +44,7 @@ class RateLimit {
         this.options.timeWait = RateLimit.timeToMs(this.options.timeWait);
 
         // store to use for persisting rate limit data
-        this.store = this.options.store;
+        this.store = this.options.store ? this.options.store : new MemoryStore();
 
         // ensure that the store extends Store class
         if (!(this.store instanceof Store)) {

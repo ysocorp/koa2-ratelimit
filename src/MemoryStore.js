@@ -1,33 +1,32 @@
 const Store = require('./Store.js');
 
-let Hits = {};
-
 class MemoryStore extends Store {
-    static cleanAll() {
-        Hits = {};
+    constructor() {
+        super();
+        this.hits = {};
     }
 
     _getHit(key, options) {
-        if (!Hits[key]) {
-            Hits[key] = {
+        if (!this.hits[key]) {
+            this.hits[key] = {
                 counter: 0,
                 date_end: Date.now() + options.interval,
             };
         }
-        return Hits[key];
+        return this.hits[key];
     }
 
     _resetAll() {
         const now = Date.now();
-        for (const key in Hits) { // eslint-disable-line
+        for (const key in this.hits) { // eslint-disable-line
             this._resetKey(key, now);
         }
     }
 
     _resetKey(key, now) {
         now = now || Date.now();
-        if (Hits[key] && Hits[key].date_end <= now) {
-            delete Hits[key];
+        if (this.hits[key] && this.hits[key].date_end <= now) {
+            delete this.hits[key];
         }
     }
 

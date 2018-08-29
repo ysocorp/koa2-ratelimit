@@ -63,7 +63,6 @@ describe('RateLimit node module', () => {
     beforeEach(() => {
         start = Date.now();
         store = new MockStore();
-        MemoryStore.cleanAll();
         memoryStore = new MemoryStore();
         nbCall = 0;
         ctx = getCtx();
