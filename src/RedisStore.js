@@ -36,12 +36,6 @@ class RedisStore extends Store {
   constructor(config){
     super();
     this.client = redis.createClient(config);
-
-    return {
-      incr: this.incr.bind(this),
-      decrement: this.decrement.bind(this),
-      saveAbuse: this.saveAbuse.bind(this)
-    }
   }
 
   /**
