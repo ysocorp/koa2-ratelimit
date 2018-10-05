@@ -86,6 +86,36 @@ const createAccountLimiter = RateLimit.middleware({
 });
 ```
 
+Use with RedisStore 
+
+```js
+const RateLimit = require('koa2-ratelimit').RateLimit;
+const Stores = require('koa2-ratelimit').Stores;
+
+RateLimit.defaultOptions({
+    message: 'Get out.',
+    store: new Stores.Redis({
+        host: 'redis_host',
+        port: 'redis_port',
+        password: 'redis_password',
+        db: 1
+    })
+});
+
+const getUserLimiter = RateLimit.middleware({
+    prefixKey: 'get/user/:id',
+});
+router.get('/user/:id', getUserLimiter, (ctx) => {});
+
+const createAccountLimiter = RateLimit.middleware.middleware({
+    prefixKey: 'post/user',
+});
+router.post('/user', createAccountLimiter, (ctx) => {});
+
+// mount routes
+app.use(router.middleware())
+```
+
 Use with SequelizeStore 
 
 ```js
