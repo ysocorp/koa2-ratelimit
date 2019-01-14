@@ -24,6 +24,8 @@ var defaultOptions = {
     handler: undefined,
     onLimitReached: undefined,
     weight: undefined,
+
+    whitelist: []
 };
 
 const TimeKeys = ['ms', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
@@ -149,6 +151,9 @@ class RateLimit {
         }
 
         const key = await this.keyGenerator(ctx);
+        if (this._isWhitelisted(key)) {
+            return next();
+        }
         const weight = await this.weight(ctx);
 
         const { counter, dateEnd } = await this.store.incr(key, this.options, weight);
@@ -185,6 +190,16 @@ class RateLimit {
             return next();
         }
         return next();
+    }
+
+    _isWhitelisted(key) {
+        const arr = key.split('::');
+        if (arr.length > 0) {
+            const ip = arr[1];
+            const { whitelist } = this.options;
+            return whitelist.includes(ip);
+        }
+        return false;
     }
 
     async wait(ms) {
