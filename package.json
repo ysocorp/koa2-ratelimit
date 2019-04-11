@@ -19,7 +19,7 @@
   "dependencies": {
     "mongoose": "^5.0.7",
     "promise-redis": "0.0.5",
-    "sequelize": "^4.28.1"
+    "sequelize": "^5.3.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.3",
