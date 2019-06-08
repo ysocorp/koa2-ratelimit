@@ -111,12 +111,13 @@ class MongodbStore extends Store {
             defaults: {
                 key,
                 dateEnd: Date.now() + options.interval,
+                counter: 0,
             },
         });
         await this._increment(this.Ratelimits, { key }, weight, 'counter');
         return {
-            counter: data.counter + weight,
-            dateEnd: data.dateEnd,
+            counter: data.value.counter + weight,
+            dateEnd: data.value.dateEnd,
         };
     }
 
