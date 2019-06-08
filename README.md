@@ -7,6 +7,16 @@ Rate-limiting middleware for Koa2 with `async` `await`. Use to limit repeated re
 
 Note: This module is based on [express-rate-limit](https://github.com/nfriedly/express-rate-limit) and adapted to koa2 ES6 with the `async` `await` capabilities.
 
+## Summary
+
+- [Install](#install)
+- [Usage](#usage)
+    - [Use with RedisStore](#use-with-redisStore)
+    - [Use with SequelizeStore](#use-with-sequelizestore)
+    - [Use with MongooseStore (Mongodb)](#use-with-mongoosestore)
+- [Configuration](#configuration)
+- [Time Type](#time-type)
+
 
 ## Install
 
@@ -86,7 +96,7 @@ const createAccountLimiter = RateLimit.middleware({
 });
 ```
 
-Use with RedisStore 
+### Use with RedisStore 
 
 ```js
 const RateLimit = require('koa2-ratelimit').RateLimit;
@@ -116,7 +126,7 @@ router.post('/user', createAccountLimiter, (ctx) => {});
 app.use(router.middleware())
 ```
 
-Use with SequelizeStore 
+### Use with SequelizeStore 
 
 ```js
 const Sequelize = require('sequelize');
@@ -147,7 +157,7 @@ router.post('/user', createAccountLimiter, (ctx) => {});
 app.use(router.middleware())
 ```
 
-Use with MongodbStore
+### Use with MongooseStore (Mongodb)
 
 ```js
 const mongoose = require('mongoose');
