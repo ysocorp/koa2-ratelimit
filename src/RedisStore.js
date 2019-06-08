@@ -52,7 +52,9 @@ class RedisStore extends Store {
     if(counter === null) {
       counter = weight;
       dateEnd = Date.now() + options.interval;
-      await this.client.setex(key, dateEnd, counter);
+
+      const seconds = Math.ceil(options.interval / 1000);
+      await this.client.setex(key, seconds, counter);
     }else {
       counter = await this.client.incrby(key, weight);
     }
