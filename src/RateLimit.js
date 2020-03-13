@@ -13,6 +13,7 @@ var defaultOptions = {
     statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
     headers: true, // Send custom rate limit header with limit and remaining
     skipFailedRequests: false, // Do not count failed requests (status >= 400)
+    skipSuccessfulRequests: false, // Do not count successful requests (status not 1xx-3xx)
     prefixKey: 'global', // the prefixKey to get to remove all key
 
     store: new MemoryStore(),
@@ -179,6 +180,14 @@ class RateLimit {
         if (this.options.skipFailedRequests) {
             ctx.res.on('finish', () => {
                 if (ctx.status >= 400) {
+                    this.store.decrement(key, this.options, weight);
+                }
+            });
+        }
+
+        if (this.options.skipSuccessfulRequests) {
+            ctx.res.on('finish', () => {
+                if (ctx.status <= 400) {
                     this.store.decrement(key, this.options, weight);
                 }
             });

@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const expect = require('expect');
+const { EventEmitter } = require('events');
 
 const RateLimit = require('../src/RateLimit.js');
 const MemoryStore = require('../src/MemoryStore.js');
@@ -43,7 +44,7 @@ class MockStore extends Store {
 function getCtx() {
     return {
         request: { ip: '192.168.1.0' },
-        res: { on: () => { } },
+        res: new EventEmitter(),
         state: { user: { id: 1 } },
         set: () => { },
     };
@@ -230,6 +231,32 @@ describe('RateLimit node module', () => {
         await middleware(ctx, nextNb);
         await middleware(ctx, nextNb);
         expect(nbCall).toBe(3);
+    });
+
+    it('should skip failed requests', async () => {
+        const middleware = RateLimit.middleware({ max: 1, skipFailedRequests: true, store });
+        const testCases = [ 400, 500];
+        for (t in testCases) {
+            ctx.status = testCases[t];
+            await middleware(ctx, nextNb);
+            ctx.res.emit('finish');
+            expect(store.decrement_was_called).toBe(true);
+            store.decrement_was_called = false;
+        }
+        expect(nbCall).toBe(testCases.length);
+    });
+
+    it('should skip successful requests', async () => {
+        const middleware = RateLimit.middleware({ max: 1, skipSuccessfulRequests: true, store });
+        const testCases = [ 100, 200, 300];
+        for (t in testCases) {
+            ctx.status = testCases[t];
+            await middleware(ctx, nextNb);
+            ctx.res.emit('finish');
+            expect(store.decrement_was_called).toBe(true);
+            store.decrement_was_called = false;
+        }
+        expect(nbCall).toBe(testCases.length);
     });
 
     it('should allow custom weight function', async () => {
