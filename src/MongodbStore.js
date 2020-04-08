@@ -3,12 +3,11 @@ const mongoose = require('mongoose');
 const Store = require('./Store.js');
 
 async function findOrCreate({ where, defaults }) {
-    return this.collection.findAndModify(
+    return this.findOneAndUpdate(
         where,
-        [],
         { $setOnInsert: defaults },
         { upsert: true, new: true }, // return new doc if one is upserted
-    );
+    ).exec();
 }
 
 const abuseSchema = new mongoose.Schema({
@@ -26,7 +25,7 @@ const abuseSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-});
+}, { timestamps: true });
 abuseSchema.statics.findOrCreate = findOrCreate;
 
 const abuseHistorySchema = new mongoose.Schema({
@@ -52,7 +51,7 @@ const abuseHistorySchema = new mongoose.Schema({
         default: 0,
     },
     userId: {
-        type: Number,
+        type: String,
         required: false,
     },
     ip: {
@@ -63,26 +62,9 @@ const abuseHistorySchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    createdAt: {
-        type: Date,
-        required: true,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        required: true,
-        default: Date.now,
-    },
-});
+}, { timestamps: true });
 abuseHistorySchema.index({ key: 1, dateEnd: 1 }, { unique: true });
 
-function beforSave(next) {
-    this.updatedAt = Date.now();
-    next();
-}
-abuseHistorySchema.pre('save', beforSave);
-abuseHistorySchema.pre('update', beforSave);
-abuseHistorySchema.pre('findOneAndUpdate', beforSave);
 abuseHistorySchema.statics.findOrCreate = findOrCreate;
 
 class MongodbStore extends Store {
@@ -100,7 +82,7 @@ class MongodbStore extends Store {
 
     // remove all if time is passed
     async _removeAll() {
-        await this.Ratelimits.remove({ dateEnd: { $lte: Date.now() } });
+        await this.Ratelimits.deleteMany({ dateEnd: { $lte: Date.now() } });
     }
 
     async incr(key, options, weight) {
@@ -116,8 +98,8 @@ class MongodbStore extends Store {
         });
         await this._increment(this.Ratelimits, { key }, weight, 'counter');
         return {
-            counter: data.value.counter + weight,
-            dateEnd: data.value.dateEnd,
+            counter: data.counter + weight,
+            dateEnd: data.dateEnd,
         };
     }
 
@@ -131,8 +113,7 @@ class MongodbStore extends Store {
         }).exec();
 
         if (ratelimit) {
-            // eslint-disable-next-line
-            const dateEnd = ratelimit.dateEnd;
+            const { dateEnd } = ratelimit;
             // create if not exist
             await this.Abuse.findOrCreate({
                 where: { key: options.key, dateEnd },
@@ -146,8 +127,7 @@ class MongodbStore extends Store {
                     ip: options.ip,
                     dateEnd,
                 },
-            }).catch(() => {});
-
+            });
             await this._increment(this.Abuse, { key: options.key, dateEnd }, 1, 'nbHit');
         }
     }
