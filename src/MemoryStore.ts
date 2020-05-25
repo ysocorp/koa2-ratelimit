@@ -1,4 +1,4 @@
-const Store = require('./Store.js');
+import Store from './Store';
 
 let Hits = {};
 
@@ -7,7 +7,7 @@ class MemoryStore extends Store {
         Hits = {};
     }
 
-    _getHit(key, options) {
+    _getHit(key: string | number, options?: any) {
         if (!Hits[key]) {
             Hits[key] = {
                 counter: 0,
@@ -24,14 +24,14 @@ class MemoryStore extends Store {
         }
     }
 
-    _resetKey(key, now) {
+    _resetKey(key: string, now: number) {
         now = now || Date.now();
         if (Hits[key] && Hits[key].date_end <= now) {
             delete Hits[key];
         }
     }
 
-    async incr(key, options, weight) {
+    async incr(key: string | number, options: any, weight: any) {
         this._resetAll();
         const hits = this._getHit(key, options);
         hits.counter += weight;
@@ -42,12 +42,12 @@ class MemoryStore extends Store {
         };
     }
 
-    decrement(key, options, weight) {
-        const hits = this._getHit(key);
+    decrement(key: string | number, options: any, weight: number) {
+        const hits = this._getHit(key, options);
         hits.counter -= weight;
     }
 
-    saveAbuse() {}
+    saveAbuse() { }
 }
 
-module.exports = MemoryStore;
+export default MemoryStore;

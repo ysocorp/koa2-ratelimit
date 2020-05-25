@@ -1,8 +1,30 @@
-const Store = require('./Store.js');
-const MemoryStore = require('./MemoryStore.js');
-
-/* eslint-disable no-var */
-var defaultOptions = {
+import Store from './Store';
+import MemoryStore from './MemoryStore'
+import Koa = require('koa')
+class Options {
+    interval?: {
+        min: number;
+    };
+    delayAfter?: number;
+    timeWait?: {
+        sec: number;
+    };
+    max?: number;
+    message?: string;
+    statusCode?: number;
+    headers?: boolean;
+    skipFailedRequests?: boolean;
+    prefixKey?: string;
+    store?: MemoryStore;
+    keyGenerator?: any
+    skip?: any
+    getUserId?: any
+    handler?: any
+    onLimitReached?: any
+    weight?: any
+    whitelist?: any[];
+}
+let defaultOptions = {
     // window, delay, and max apply per-key unless global is set to true
     interval: { min: 1 }, // milliseconds - how long to keep records of requests in memory
     delayAfter: 0, // how many requests to allow through before starting to delay responses
@@ -25,7 +47,7 @@ var defaultOptions = {
     onLimitReached: undefined,
     weight: undefined,
 
-    whitelist: []
+    whitelist: [],
 };
 
 const TimeKeys = ['ms', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
@@ -42,7 +64,9 @@ const Times = {
 const toFinds = ['id', 'userId', 'user_id', 'idUser', 'id_user'];
 
 class RateLimit {
-    constructor(options) {
+    options: any;
+    store: any;
+    constructor(options: Options) {
         this.options = Object.assign({}, defaultOptions, options);
         this.options.interval = RateLimit.timeToMs(this.options.interval);
         this.options.timeWait = RateLimit.timeToMs(this.options.timeWait);
@@ -56,7 +80,7 @@ class RateLimit {
         }
     }
 
-    static timeToMs(time) {
+    static timeToMs(time: { [x: string]: number; }) {
         if (typeof time === 'object') {
             let timeMs = 0;
             for (const key in time) {
@@ -74,7 +98,7 @@ class RateLimit {
         return time;
     }
 
-    async keyGenerator(ctx) {
+    async keyGenerator(ctx: Koa.Context) {
         if (this.options.keyGenerator) {
             return this.options.keyGenerator(ctx);
         }
@@ -85,21 +109,21 @@ class RateLimit {
         return `${this.options.prefixKey}|${ctx.request.ip}`;
     }
 
-    async weight(ctx) {
+    async weight(ctx: Koa.Context) {
         if (this.options.weight) {
             return this.options.weight(ctx);
         }
         return 1;
     }
 
-    async skip(ctx) { // eslint-disable-line
+    async skip(ctx: Koa.Context) { // eslint-disable-line
         if (this.options.skip) {
             return this.options.skip(ctx);
         }
         return false;
     }
 
-    async getUserId(ctx) {
+    async getUserId(ctx: Koa.Context) {
         if (this.options.getUserId) {
             return this.options.getUserId(ctx);
         }
@@ -116,19 +140,19 @@ class RateLimit {
         return null;
     }
 
-    async handler(ctx/* , next */) {
+    async handler(ctx: Koa.Context, next: Koa.Next) {
         if (this.options.handler) {
             this.options.handler(ctx);
         } else {
             ctx.status = this.options.statusCode;
             ctx.body = { message: this.options.message };
             if (this.options.headers) {
-                ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
+                ctx.set('Retry-After', Math.ceil(this.options.interval / 1000).toString());
             }
         }
     }
 
-    async onLimitReached(ctx) {
+    async onLimitReached(ctx: Koa.Context) {
         if (this.options.onLimitReached) {
             this.options.onLimitReached(ctx);
         } else {
@@ -143,8 +167,7 @@ class RateLimit {
     get middleware() {
         return this._rateLimit.bind(this);
     }
-
-    async _rateLimit(ctx, next) {
+    async _rateLimit(ctx: Koa.Context, next: Koa.Next) {
         const skip = await this.skip(ctx);
         if (skip) {
             return next();
@@ -192,7 +215,7 @@ class RateLimit {
         return next();
     }
 
-    _isWhitelisted(key) {
+    _isWhitelisted(key: string) {
         const arr = key.split('::');
         if (arr.length > 0) {
             const ip = arr[1];
@@ -202,17 +225,17 @@ class RateLimit {
         return false;
     }
 
-    async wait(ms) {
+    async wait(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
-module.exports = {
+export default {
     RateLimit,
-    middleware(options = {}) {
+    middleware(options: Options = {}) {
         return new RateLimit(options).middleware;
     },
-    defaultOptions(options = {}) {
+    defaultOptions(options: Options = {}) {
         defaultOptions = Object.assign(defaultOptions, options);
     },
 };

@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose = require('mongoose');
 
-const Store = require('./Store.js');
+import Store from './Store';
 
-async function findOrCreate({ where, defaults }) {
+async function findOrCreate(this: any, { where, defaults }) {
     return this.collection.findAndModify(
         where,
         [],
@@ -76,7 +76,7 @@ const abuseHistorySchema = new mongoose.Schema({
 });
 abuseHistorySchema.index({ key: 1, dateEnd: 1 }, { unique: true });
 
-function beforSave(next) {
+function beforSave(this: any, next: () => void) {
     this.updatedAt = Date.now();
     next();
 }
@@ -86,7 +86,11 @@ abuseHistorySchema.pre('findOneAndUpdate', beforSave);
 abuseHistorySchema.statics.findOrCreate = findOrCreate;
 
 class MongodbStore extends Store {
-    constructor(mongodb, options = {}) {
+    collectionName: any;
+    collectionAbuseName: any;
+    Ratelimits: any;
+    Abuse: any;
+    constructor(mongodb: { model: (arg0: any, arg1: mongoose.Schema<any>) => any; }, options: any = {}) {
         super();
         this.collectionName = options.collectionName || 'Ratelimits';
         this.collectionAbuseName = options.collectionAbuseName || `${this.collectionName}Abuses`;
@@ -94,7 +98,7 @@ class MongodbStore extends Store {
         this.Abuse = mongodb.model(this.collectionAbuseName, abuseHistorySchema);
     }
 
-    async _increment(model, where, nb = 1, field) {
+    async _increment(model: { findOneAndUpdate: (arg0: any, arg1: { $inc: { [x: number]: number; }; }) => any; }, where: { key: any; dateEnd?: any; }, nb = 1, field: string) {
         return model.findOneAndUpdate(where, { $inc: { [field]: nb } });
     }
 
@@ -103,7 +107,7 @@ class MongodbStore extends Store {
         await this.Ratelimits.remove({ dateEnd: { $lte: Date.now() } });
     }
 
-    async incr(key, options, weight) {
+    async incr(key: any, options: { interval: number; }, weight: number | undefined) {
         await this._removeAll();
 
         const data = await this.Ratelimits.findOrCreate({
@@ -121,11 +125,11 @@ class MongodbStore extends Store {
         };
     }
 
-    async decrement(key, options, weight) {
+    async decrement(key: any, options: any, weight: number) {
         await this._increment(this.Ratelimits, { key }, -weight, 'counter');
     }
 
-    async saveAbuse(options) {
+    async saveAbuse(options: { key: any; prefixKey: any; interval: any; max: any; user_id: any; ip: any; }) {
         const ratelimit = await this.Ratelimits.findOne({
             key: options.key,
         }).exec();
@@ -146,11 +150,11 @@ class MongodbStore extends Store {
                     ip: options.ip,
                     dateEnd,
                 },
-            }).catch(() => {});
+            }).catch(() => { });
 
             await this._increment(this.Abuse, { key: options.key, dateEnd }, 1, 'nbHit');
         }
     }
 }
 
-module.exports = MongodbStore;
+export default MongodbStore;

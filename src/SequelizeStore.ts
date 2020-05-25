@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
+import Sequelize = require('sequelize');
 
-const Store = require('./Store.js');
+import Store from './Store';
 
 const tableOption = [
     {
@@ -87,7 +87,12 @@ const tableAbuseOption = [
 ];
 
 class SequelizeStore extends Store {
-    constructor(sequelize, options = {}) {
+    sequelize: any;
+    tableName: any;
+    tableAbuseName: any;
+    table: any;
+    tableAbuses: any;
+    constructor(sequelize: any, options: any = {}) {
         super();
         this.sequelize = sequelize;
         this.tableName = options.tableName || 'ratelimits';
@@ -103,6 +108,7 @@ class SequelizeStore extends Store {
         }
         return this.table;
     }
+
     async _getTableAbuse() {
         if (!this.tableAbuses) {
             this.tableAbuses = this.sequelize.define(
@@ -115,12 +121,12 @@ class SequelizeStore extends Store {
         return this.tableAbuses;
     }
 
-    async _increment(table, where, nb = 1, field) {
-        return table.update({ [field]: global.sequelize.literal(`${field} + ${nb}`) }, { where });
+    async _increment(table: { update: (arg0: { [x: number]: any; }, arg1: { where: any; }) => any; }, where: { key: any; date_end?: any; }, nb = 1, field: string) {
+        return table.update({ [field]: global['sequelize'].literal(`${field} + ${nb}`) }, { where });
     }
 
     // remove all if time is passed
-    async _removeAll(table) {
+    async _removeAll(table: { destroy: (arg0: { where: { date_end: { $lte: number; }; }; }) => any; }) {
         const now = new Date();
         await table.destroy({
             where: {
@@ -129,7 +135,7 @@ class SequelizeStore extends Store {
         });
     }
 
-    async incr(key, options, weight) {
+    async incr(key: any, options: { interval: number; }, weight: number | undefined) {
         const table = await this._getTable();
         await this._removeAll(table);
         const now = new Date();
@@ -148,12 +154,12 @@ class SequelizeStore extends Store {
         };
     }
 
-    async decrement(key, options, weight) {
+    async decrement(key: any, options: any, weight: number) {
         const table = await this._getTable();
         await this._increment(table, { key }, -weight, 'counter');
     }
 
-    async saveAbuse(options) {
+    async saveAbuse(options: { key: any; prefixKey: any; interval: any; max: any; user_id: any; ip: any; }) {
         const table = await this._getTable();
         const ratelimit = await table.findOne({ where: { key: options.key } });
 
@@ -176,10 +182,10 @@ class SequelizeStore extends Store {
                         date_end,
                     },
                 })
-                .catch(() => {});
+                .catch(() => { });
             await this._increment(tableAbuse, { key: options.key, date_end }, 1, 'nb_hit');
         }
     }
 }
 
-module.exports = SequelizeStore;
+export default SequelizeStore;

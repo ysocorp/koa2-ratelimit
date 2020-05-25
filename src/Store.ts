@@ -11,4 +11,4 @@ class Store {
     }
 }
 
-module.exports = Store;
+export default Store;

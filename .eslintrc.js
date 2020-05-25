@@ -5,8 +5,15 @@ module.exports = {
         "protractor": true,
         "es6": true
     },
-    "extends": "airbnb",
-    "parser": "babel-eslint",
+    // "extends": "airbnb",
+    "parser": "@typescript-eslint/parser",
+    parserOptions: {
+        ecmaVersion: new Date().getFullYear() - 1,
+        sourceType: 'module',
+        ecmaFeatures: {
+            modules: true,
+        },
+    },
     "rules": {
         //"import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.spec.js"] }],
         "indent": ["error", 4],
