@@ -60,7 +60,7 @@ class RedisStore extends Store {
         dateEnd = 1;
       }
 
-      [counter] = await this.client.multi().incrby(key, weight).pexpire(key, dateEnd).exec();
+      counter = await this.client.incrby(key, weight);
 
       dateEnd = Date.now() + dateEnd;
     }
