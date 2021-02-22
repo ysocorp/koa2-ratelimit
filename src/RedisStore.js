@@ -57,7 +57,7 @@ class RedisStore extends Store {
       await this.client.setex(key, seconds, counter);
     }else {
       if (dateEnd < 0) {
-        dateEnd = 1;
+        dateEnd = 0;
       }
 
       counter = await this.client.incrby(key, weight);
