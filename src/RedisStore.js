@@ -16,7 +16,8 @@ const Store = require('./Store.js');
 /**
  * redis
  *
- * node-redis module
+ * promise-redis module
+ * https://github.com/maxbrieiev/promise-redis#readme
  */
 const redis = require('redis');
 
