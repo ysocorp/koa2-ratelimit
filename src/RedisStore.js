@@ -1,36 +1,36 @@
 /**
  * RedisStore
- * 
+ *
  * RedisStore for koa2-ratelimit
- * 
+ *
  * @author Ashok Vishwakarma <akvlko@gmail.com>
  */
 
 /**
  * Store
- * 
+ *
  * Existing Store class
  */
 const Store = require('./Store.js');
 
 /**
  * redis
- * 
+ *
  * promise-redis module
  * https://github.com/maxbrieiev/promise-redis#readme
  */
-const redis = require('promise-redis')();
+const redis = require('redis');
 
 /**
  * RedisStore
- * 
+ *
  * Class RedisStore
  */
 class RedisStore extends Store {
   /**
    * constructor
-   * @param {*} config 
-   * 
+   * @param {*} config
+   *
    * config is redis config
    */
   constructor(config){
@@ -41,14 +41,14 @@ class RedisStore extends Store {
   /**
    * _hit
    * @access private
-   * @param {*} key 
-   * @param {*} options 
-   * @param {*} weight 
+   * @param {*} key
+   * @param {*} options
+   * @param {*} weight
    */
   async _hit(key, options, weight) {
 
     let [counter, dateEnd] = await this.client.multi().get(key).ttl(key).exec();
-    
+
     if(counter === null) {
       counter = weight;
       dateEnd = Date.now() + options.interval;
@@ -67,11 +67,11 @@ class RedisStore extends Store {
 
   /**
    * incr
-   * 
+   *
    * Override incr method from Store class
-   * @param {*} key 
-   * @param {*} options 
-   * @param {*} weight 
+   * @param {*} key
+   * @param {*} options
+   * @param {*} weight
    */
   async incr(key, options, weight) {
     return await this._hit(key, options, weight);
@@ -79,11 +79,11 @@ class RedisStore extends Store {
 
   /**
    * decrement
-   * 
+   *
    * Override decrement method from Store class
-   * @param {*} key 
-   * @param {*} options 
-   * @param {*} weight 
+   * @param {*} key
+   * @param {*} options
+   * @param {*} weight
    */
   async decrement(key, options, weight) {
     await this.client.decrby(key, weight);
@@ -91,7 +91,7 @@ class RedisStore extends Store {
 
   /**
    * saveAbuse
-   * 
+   *
    * Override saveAbuse method from Store class
    */
   saveAbuse() {}
