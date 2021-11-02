@@ -36,6 +36,10 @@ class RedisStore extends Store {
   constructor(config){
     super();
     this.client = redis.createClient(config);
+    this.client.on('error', (err) => console.log('Redis Client Error', err));
+    this.client.connect()
+
+
   }
 
   /**
@@ -54,9 +58,9 @@ class RedisStore extends Store {
       dateEnd = Date.now() + options.interval;
 
       const seconds = Math.ceil(options.interval / 1000);
-      await this.client.setex(key, seconds, counter);
+      await this.client.setEx(key, seconds.toString(), counter.toString());
     }else {
-      counter = await this.client.incrby(key, weight);
+      counter = await this.client.incrBy(key, weight);
     }
 
     return {
@@ -86,7 +90,7 @@ class RedisStore extends Store {
    * @param {*} weight
    */
   async decrement(key, options, weight) {
-    await this.client.decrby(key, weight);
+    await this.client.decrBy(key, weight);
   }
 
   /**
