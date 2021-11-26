@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "mongoose": "^5.5.13",
-    "redis": "^4.0.0-rc.3",
+    "redis": "^4.0.0",
     "sequelize": "^5.8.7"
   },
   "devDependencies": {
