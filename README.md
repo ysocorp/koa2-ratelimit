@@ -101,14 +101,16 @@ const createAccountLimiter = RateLimit.middleware({
 ```js
 const RateLimit = require('koa2-ratelimit').RateLimit;
 const Stores = require('koa2-ratelimit').Stores;
-
+//Detailed Redis Configuration Reference: https://github.com/redis/node-redis/blob/master/docs/client-configuration.md
 RateLimit.defaultOptions({
     message: 'Get out.',
     store: new Stores.Redis({
-        host: 'redis_host',
-        port: 'redis_port',
+        socket: {
+            host: 'redis_host',
+            port: 'redis_port',
+        },
         password: 'redis_password',
-        db: 1
+        database: 1
     })
 });
 
