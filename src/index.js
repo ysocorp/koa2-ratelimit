@@ -1,5 +1,6 @@
 const RateLimit = require("./RateLimit.js");
 const MemoryStore = require("./MemoryStore.js");
+const Store = require("./Store.js");
 
 module.exports = {
   RateLimit,
