@@ -16,6 +16,8 @@ Note: This module is based on [express-rate-limit](https://github.com/nfriedly/e
     - [Use with MongooseStore (Mongodb)](#use-with-mongoosestore)
 - [Configuration](#configuration)
 - [Time Type](#time-type)
+- [Upgrade](#upgrade)
+ - [0.9.1 to 1.0.0](#0.9.1-to-1.0.0)
 
 
 ## Install
@@ -312,6 +314,16 @@ Examples
     });
 ```
     
+## Upgrade
+
+### 0.9.1 to 1.0.0
+
+1.0.0 moves sequelize, mongoose and redis from dependencies to peerDependencies.
+
+Install the one you use (see [Use with RedisStore](#use-with-redisStore), [Use with SequelizeStore](#use-with-sequelizestore) or [Use with MongooseStore (Mongodb)](#use-with-mongoosestore)).
+
+The rest did not change.
+
 
 ## License
 
