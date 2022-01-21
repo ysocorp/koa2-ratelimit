@@ -1,17 +1,22 @@
-const RateLimit = require('./RateLimit.js');
-const MemoryStore = require('./MemoryStore.js');
-const SequelizeStore = require('./SequelizeStore.js');
-const MongodbStore = require('./MongodbStore.js');
-const RedisStore = require('./RedisStore.js');
-const Store = require('./Store.js');
+const RateLimit = require("./RateLimit.js");
+const MemoryStore = require("./MemoryStore.js");
 
 module.exports = {
-    RateLimit,
-    Stores: {
-        Memory: MemoryStore,
-        Sequelize: SequelizeStore,
-        Mongodb: MongodbStore,
-        Redis: RedisStore,
-        Store,
+  RateLimit,
+  Stores: {
+    Memory: MemoryStore,
+    get Sequelize() {
+      // eslint-disable-next-line global-require
+      return require("./SequelizeStore.js");
     },
+    get Mongodb() {
+      // eslint-disable-next-line global-require
+      return require("./MongodbStore.js");
+    },
+    get Redis() {
+      // eslint-disable-next-line global-require
+      return require("./RedisStore.js");
+    },
+    Store,
+  },
 };

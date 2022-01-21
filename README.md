@@ -98,6 +98,10 @@ const createAccountLimiter = RateLimit.middleware({
 
 ### Use with RedisStore 
 
+```bash
+npm install redis@4
+```
+
 ```js
 const RateLimit = require('koa2-ratelimit').RateLimit;
 const Stores = require('koa2-ratelimit').Stores;
@@ -130,6 +134,10 @@ app.use(router.middleware())
 
 ### Use with SequelizeStore 
 
+```bash
+npm install sequelize@5
+```
+
 ```js
 const Sequelize = require('sequelize');
 const RateLimit = require('koa2-ratelimit').RateLimit;
@@ -160,6 +168,10 @@ app.use(router.middleware())
 ```
 
 ### Use with MongooseStore (Mongodb)
+
+```bash
+npm install mongoose@5
+```
 
 ```js
 const mongoose = require('mongoose');
