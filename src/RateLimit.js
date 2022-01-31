@@ -193,11 +193,11 @@ class RateLimit {
     }
 
     _isWhitelisted(key) {
-        const arr = key.split('::');
+        const arr = key.split('|');
         if (arr.length > 0) {
-            const ip = arr[1];
+            const userId = arr[1];
             const { whitelist } = this.options;
-            return whitelist.includes(ip);
+            return whitelist.includes(userId);
         }
         return false;
     }

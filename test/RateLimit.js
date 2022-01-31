@@ -276,4 +276,16 @@ describe('RateLimit node module', () => {
         expect(dateEndReset).toBe(dateEndSec);
         expect(ctx.state.rateLimit.reset).toBe(dateEndSec);
     });
+
+    it('should skip ratelimit if userId is whitelisted', async () => {
+        store.incr = async () => {
+            assert.fail('Ratelimit wasn\'t skipped');
+        };
+
+        ctx.state.user.id = 'userId';
+        const middleware = RateLimit.middleware({ store, whitelist: ['userId'] });
+        await middleware(ctx, nextNb);
+        
+        expect(nbCall).toBe(1);
+    });
 });
