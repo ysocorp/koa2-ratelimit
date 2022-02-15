@@ -51,15 +51,18 @@ class RedisStore extends Store {
   async _hit(key, options, weight) {
 
     let [counter, dateEnd] = await this.client.multi().get(key).ttl(key).exec();
-    
-    if(counter === null) {
+
+    //check "dateEnd===-1", the reason is below
+    if(counter === null || dateEnd===-1) {
       counter = weight;
       dateEnd = Date.now() + options.interval;
 
       const seconds = Math.ceil(options.interval / 1000);
       await this.client.setEx(key, seconds.toString(), counter.toString());
     }else {
+      //"dateEnd===-1" may happen just after ttl expires then "await this.client.incrBy(key, weight)" will set ttl to -1; we count this low probability requests as the previous period and check "dateEnd===-1" for the next request
       counter = await this.client.incrBy(key, weight);
+      dateEnd = Date.now() + dateEnd * 1000;
     }
 
     return {
