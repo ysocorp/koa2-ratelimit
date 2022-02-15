@@ -204,7 +204,9 @@ A `ctx.state.rateLimit` property is added to all requests with the `limit`, `cur
 * **statusCode**: HTTP status code returned when `max` is exceeded. Defaults to `429`.
 * **headers**: Enable headers for request limit (`X-RateLimit-Limit`) and current usage (`X-RateLimit-Remaining`) on all responses and time to wait before retrying (`Retry-After`) when `max` is exceeded.
 * **skipFailedRequests**: when `true`, failed requests (response status >= 400) won't be counted. Defaults to `false`.
-* **whitelist**: Array of whitelisted IPs to not be rate limited.
+* **whitelist**: Array of whitelisted IPs/UserIds to not be rate limited.
+* **getUserIdFromKey**: Function that extracts from given key the userId. Defaults to `(key) => key.split(options.prefixKeySeparator)`.
+* **prefixKeySeparator**: Separator string between the prefixKey and the userId. Defaults to `::`. (Set it to `|` if you want whitelist userIds)
 * **getUserId**: Function used to get userId (if connected) to be added as key and saved in bdd, should an abuse case surface. Defaults:
 
     ```js

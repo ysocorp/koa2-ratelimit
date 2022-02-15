@@ -14,18 +14,21 @@ var defaultOptions = {
     headers: true, // Send custom rate limit header with limit and remaining
     skipFailedRequests: false, // Do not count failed requests (status >= 400)
     prefixKey: 'global', // the prefixKey to get to remove all key
+    prefixKeySeparator: '::', // the seperator between the prefixKey and the userId
+
 
     store: new MemoryStore(),
 
     // redefin fonction
     keyGenerator: undefined,
+    getUserIdFromKey: undefined,
     skip: undefined,
     getUserId: undefined,
     handler: undefined,
     onLimitReached: undefined,
     weight: undefined,
 
-    whitelist: []
+    whitelist: [],
 };
 
 const TimeKeys = ['ms', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
@@ -46,7 +49,6 @@ class RateLimit {
         this.options = Object.assign({}, defaultOptions, options);
         this.options.interval = RateLimit.timeToMs(this.options.interval);
         this.options.timeWait = RateLimit.timeToMs(this.options.timeWait);
-
         // store to use for persisting rate limit data
         this.store = this.options.store;
 
@@ -193,13 +195,26 @@ class RateLimit {
     }
 
     _isWhitelisted(key) {
-        const arr = key.split('::');
-        if (arr.length > 0) {
-            const ip = arr[1];
-            const { whitelist } = this.options;
-            return whitelist.includes(ip);
+        const { whitelist } = this.options;
+
+        if (whitelist == null || whitelist.length === 0) {
+            return false;
+        }
+
+        const userId = this.getUserIdFromKey(key);
+        if (userId) {
+            return whitelist.includes(userId);
         }
         return false;
+    }
+
+    getUserIdFromKey(key) {
+        if (this.options.getUserIdFromKey) {
+            return this.options.getUserIdFromKey(key);
+        }
+
+        const [, userId] = key.split(this.options.prefixKeySeparator);
+        return userId;
     }
 
     async wait(ms) {

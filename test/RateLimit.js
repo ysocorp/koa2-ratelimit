@@ -276,4 +276,43 @@ describe('RateLimit node module', () => {
         expect(dateEndReset).toBe(dateEndSec);
         expect(ctx.state.rateLimit.reset).toBe(dateEndSec);
     });
+
+    describe('Whitelist users', () => {
+        beforeEach(() => {
+            store.incr = async () => {
+                assert.fail('Ratelimit wasn\'t skipped');
+            };
+        });
+
+        async function runtWhitelistTest(options) {
+            const middleware = RateLimit.middleware({ store, ...options});
+            await middleware(ctx, nextNb);
+            expect(nbCall).toBe(1);
+        }
+
+        it('should skip ratelimit if userId is whitelisted', async () => {
+            await runtWhitelistTest({
+                whitelist: ['userId'],
+                getUserId: () => Promise.resolve('prefix::userId'),
+            });
+        });
+
+        it('should allow to overwrite the prefix key separator', async () => {
+            ctx.state.user.id = 'userId';
+            
+            await runtWhitelistTest({
+                whitelist: ['userId'],
+                prefixKeySeparator: '|',
+            });
+        });
+
+        it('should allow to customize the key parsing logic', async () => {
+            ctx.state.user.id = 'userId';
+            await runtWhitelistTest({
+                store,
+                whitelist: ['userId'],
+                getUserIdFromKey: key => key.split('|')[1],
+            });
+        });
+    });
 });
