@@ -58,7 +58,13 @@ class RedisStore extends Store {
 
       const seconds = Math.ceil(options.interval / 1000);
       await this.client.setEx(key, seconds.toString(), counter.toString());
-    }else {
+    } else if (dateEnd === -2 || dateEnd === -1) {
+      counter = counter + weight;
+      dateEnd = Date.now() + options.interval;
+
+      const seconds = Math.ceil(options.interval / 1000);
+      await this.client.setEx(key, seconds.toString(), counter.toString());
+    } else {
       counter = await this.client.incrBy(key, weight);
     }
 
