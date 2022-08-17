@@ -65,7 +65,8 @@ const createAccountLimiter = RateLimit.middleware({
   timeWait: 3*1000, // slow down subsequent responses by 3 seconds per request
   max: 5, // start blocking after 5 requests
   prefixKey: 'post/user', // to allow the bdd to Differentiate the endpoint 
-  message: "Too many accounts created from this IP, please try again after an hour"
+  message: "Too many accounts created from this IP, please try again after an hour",
+  messageKey: "error"
 });
 // add route  with createAccountLimiter middleware
 router.post('/user', createAccountLimiter, (ctx) => {
