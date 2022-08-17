@@ -10,6 +10,7 @@ var defaultOptions = {
     max: 5, // max number of recent connections during `window` milliseconds before sending a 429 response
 
     message: 'Too many requests, please try again later.',
+    messageKey: 'message',
     statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
     headers: true, // Send custom rate limit header with limit and remaining
     skipFailedRequests: false, // Do not count failed requests (status >= 400)
@@ -123,7 +124,7 @@ class RateLimit {
             this.options.handler(ctx);
         } else {
             ctx.status = this.options.statusCode;
-            ctx.body = { message: this.options.message };
+            ctx.body = { [this.options.messageKey]: this.options.message };
             if (this.options.headers) {
                 ctx.set('Retry-After', Math.ceil(this.options.interval / 1000));
             }
