@@ -82,5 +82,6 @@
     "brute-force-sequelize",
     "brute-force-mongodb",
     "attack"
-  ]
+  ],
+  "license" : "MIT"
 }
