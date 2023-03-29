@@ -1,7 +1,7 @@
 {
   "name": "koa2-ratelimit",
   "author": "YSO CORP",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "IP rate-limiting middleware for Koajs 2. Use to limit repeated requests to APIs and/or endpoints such as password reset.",
   "main": "src/index.js",
   "engines": {
@@ -83,5 +83,5 @@
     "brute-force-mongodb",
     "attack"
   ],
-  "license" : "MIT"
+  "license": "MIT"
 }
