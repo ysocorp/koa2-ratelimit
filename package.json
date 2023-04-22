@@ -16,8 +16,8 @@
     "type": "git",
     "url": "https://github.com/ysocorp/koa2-ratelimit"
   },
-  "dependencies": {},
   "peerDependencies": {
+    "ioredis": ">= 5",
     "mongoose": ">= 5",
     "redis": ">= 4.0.0",
     "sequelize": ">=5.8.7"
@@ -30,6 +30,9 @@
       "optional": true
     },
     "sequelize": {
+      "optional": true
+    },
+    "ioredis": {
       "optional": true
     }
   },
