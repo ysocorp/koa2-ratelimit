@@ -18,6 +18,10 @@ module.exports = {
       // eslint-disable-next-line global-require
       return require("./RedisStore.js");
     },
+    get IORedis() {
+      // eslint-disable-next-line global-require
+      return require("./IORedisStore.js");
+    },
     Store,
   },
 };
