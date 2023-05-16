@@ -116,7 +116,8 @@ class SequelizeStore extends Store {
     }
 
     async _increment(table, where, nb = 1, field) {
-        return table.update({ [field]: global.sequelize.literal(`${field} + ${nb}`) }, { where });
+        let sequelizeTmp = global.sequelize || this.sequelize; // for sequelize v6
+        return table.update({ [field]: sequelizeTmp.literal(`${field} + ${nb}`) }, { where });
     }
 
     // remove all if time is passed
