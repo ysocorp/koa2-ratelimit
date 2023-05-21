@@ -11,7 +11,8 @@ Note: This module is based on [express-rate-limit](https://github.com/nfriedly/e
 
 - [Install](#install)
 - [Usage](#usage)
-    - [Use with RedisStore](#use-with-redisStore)
+    - [Use with RedisStore](#use-with-redisstore)
+    - [Use with IORedisStore](#use-with-ioredisstore)
     - [Use with SequelizeStore](#use-with-sequelizestore)
     - [Use with MongooseStore (Mongodb)](#use-with-mongoosestore)
 - [Configuration](#configuration)
@@ -118,6 +119,40 @@ RateLimit.defaultOptions({
         },
         password: 'redis_password',
         database: 1
+    })
+});
+
+const getUserLimiter = RateLimit.middleware({
+    prefixKey: 'get/user/:id',
+});
+router.get('/user/:id', getUserLimiter, (ctx) => {});
+
+const createAccountLimiter = RateLimit.middleware.middleware({
+    prefixKey: 'post/user',
+});
+router.post('/user', createAccountLimiter, (ctx) => {});
+
+// mount routes
+app.use(router.middleware())
+```
+
+### Use with IORedisStore
+
+```bash
+npm install ioredis@5
+```
+
+```js
+const RateLimit = require('koa2-ratelimit').RateLimit;
+const Stores = require('koa2-ratelimit').Stores;
+// Detailed IORedis Configuration Reference: https://github.com/luin/ioredis#connect-to-redis
+RateLimit.defaultOptions({
+    message: 'Get out.',
+    store: new Stores.IORedis({
+        host: 'redis_host',
+        port: 'redis_port',
+        password: 'redis_password',
+        db: 1
     })
 });
 
