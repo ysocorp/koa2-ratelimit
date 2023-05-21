@@ -66,7 +66,7 @@ class IORedisStore extends Store {
      * @param {*} weight
      */
     async _hit(key, options, weight) {
-        let [[, [counter, dateEnd]]] = await this.client.multi()
+        let [[, counter], [, dateEnd]] = await this.client.multi()
             .get(key)
             .ttl(key)
             .exec();
